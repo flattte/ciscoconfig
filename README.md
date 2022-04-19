@@ -1,5 +1,5 @@
 # ciscoconfig
-little tool to check for cisco configs
+little tool to check cisco configs
 
 
 usage
