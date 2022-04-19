@@ -1,0 +1,8 @@
+dhcp pol vl
+user jsomeone nthash
+interface FastEthernet1
+Interface FastEthernet3 192.168.0.1
+no ip address
+access-list 103 permit esp host 200.1.1.1 any
+nonsens
+ip address 10.0.2.1 255.255.255.0
