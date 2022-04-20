@@ -13,7 +13,7 @@ def open_files(path1, path2):
     try:
         file2 = open(path2, 'r')
     except Exception as e:
-        exit()(f"Exception {e.__class__} occurred while opening {path2}. \n Enter a valid path to a file that exists")
+        exit(f"Exception {e.__class__} occurred while opening {path2}. \n Enter a valid path to a file that exists")
 
     return file1, file2
 
