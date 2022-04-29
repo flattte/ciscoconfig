@@ -48,7 +48,8 @@ def yieldToken(token):
 
 
 def printToken(token, color="white"):
-    os.system("color")
+    if os.name == "nt":
+        os.system("color")
     g = yieldToken(token)
     print("Query:")
     print(termcolor.colored(f"    {next(g)}", color))
