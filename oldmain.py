@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import argparse
-from parser.weakmatching import *
+from parser.weakmatching import WeakMatchingParser
 
 def open_files(path1, path2):
     assert type(args.config) is str, "Enter a -s flag followed by config path to config file."
@@ -27,19 +27,11 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
 
     config, target = open_files(args.config, args.target)
-    
-    config_tokens = tokenizeConfig(config)   
-    target_tokens = [line for line in target.read().splitlines()]
-
-    matches = matchTokens(config_tokens, target_tokens)
-    results = getBest(matches)
+    parser = WeakMatchingParser(config, target, args.verbose)
+    parser.parse()
     # data frame:
     #   result[0]     - metric score
     #   results[1][0] - body of a token
     #   results[1][1] - query
 
-    count = [0]
-    for r in results:
-        oracle(r, args.verbose, count)
-
-    print(f"Matches {count[0]} out of {len(results)}")
+    print(f"Matches {parser.count} out of {parser.n_of_tokens}")
