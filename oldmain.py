@@ -29,9 +29,6 @@ if __name__ == "__main__":
     config, target = open_files(args.config, args.target)
     parser = WeakMatchingParser(config, target, args.verbose)
     parser.parse()
-    # data frame:
-    #   result[0]     - metric score
-    #   results[1][0] - body of a token
-    #   results[1][1] - query
+ 
 
     print(f"Matches {parser.count} out of {parser.n_of_tokens}")
