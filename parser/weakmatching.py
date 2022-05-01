@@ -1,7 +1,6 @@
 import functools
 import os
 import termcolor
-import main
 
 def tokenizeConfig(config):
     token, tokens = [], []

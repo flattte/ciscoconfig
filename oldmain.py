@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import argparse
-from parser import *
+from parser.weakmatching import *
 
 def open_files(path1, path2):
     assert type(args.config) is str, "Enter a -s flag followed by config path to config file."
