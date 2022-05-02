@@ -1,0 +1,33 @@
+!
+version 12.3
+no service pad
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+!
+aaa authentication login eap_methods group rad_eap
+aaa session-id common
+ip subnet-zero
+ip cef
+!
+vpdn enable
+	vpdn-group 1
+	request-dialin
+	protocol pppoe
+!
+!
+line con 0
+	password cisco123
+	no modem enable
+	transport preferred all
+	transport output all
+line aux 0
+	transport preferred all
+	transport output all
+line vty 0 4
+	password cisco123
+	transport preferred all
+	transport input all
+	transport output all
+!

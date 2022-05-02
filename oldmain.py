@@ -1,21 +1,8 @@
 #!/usr/bin/python3
 import argparse
 from parser.weakmatching import WeakMatchingParser
+from parser.parserutils import open_files
 
-def open_files(path1, path2):
-    assert type(args.config) is str, "Enter a -s flag followed by config path to config file."
-    assert type(args.target) is str, "Enter a -t flag followed by config path to config file."
-    try:
-        file1 = open(path1, 'r')
-    except Exception as e:
-        exit(f"Exception {e.__class__} occurred while opening {path1}. \n Enter a valid path to a file that exists")
-
-    try:
-        file2 = open(path2, 'r')
-    except Exception as e:
-        exit(f"Exception {e.__class__} occurred while opening {path2}. \n Enter a valid path to a file that exists")
-
-    return file1, file2
 
 
 if __name__ == "__main__":
