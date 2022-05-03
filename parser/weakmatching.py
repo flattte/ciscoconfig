@@ -7,7 +7,7 @@ class WeakMatchingParser(object):
         self.config = tokenizeConfig(config)
         self.target = [line for line in target.read().splitlines()]
         self.verbose = verbose
-        self.count = 0
+        self.score = 0
         self.n_of_tokens = 0
 
 
@@ -43,7 +43,7 @@ class WeakMatchingParser(object):
     def oracle(self, token, verbose) -> None:
         if token[1][1].lower() in [t.lower() for t in token[1][0]]:
             if verbose: printToken(token, color="green")
-            self.count += 1
+            self.score += 1
         elif token[0] > 0.55:
             if verbose: printToken(token, color="yellow")
         else:

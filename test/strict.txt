@@ -31,3 +31,5 @@ line vty 0 4
 	transport input all
 	transport output all
 !
+somehing somthin
+!

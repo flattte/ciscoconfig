@@ -18,4 +18,4 @@ if __name__ == "__main__":
     parser.parse()
  
 
-    print(f"Matches found {parser.count} out of {parser.n_of_tokens}")
+    print(f"Matches found {parser.score} out of {parser.n_of_tokens}")
