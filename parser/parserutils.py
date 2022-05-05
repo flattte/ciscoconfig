@@ -52,3 +52,47 @@ def open_files(path1, path2):
         exit(f"Exception {e.__class__} occurred while opening {path2}. \n Enter a valid path to a file that exists")
 
     return file1, file2
+
+class ConfigDownloader(object):
+    def __init__(self, address, username, password, commands):
+        import paramiko
+        self.commands = commands
+        self.username = username
+        self.password = password
+        self.address = address
+        self.conn = paramiko.SSHClient()
+        self.conn.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self.shell = None
+
+    def download(self):
+        def send_and_readuntil(message, until):
+            self.shell.send(message)
+            temp = b""
+            out = b""
+            while until.encode() not in temp:
+                temp = self.shell.recv(4096)
+                out += temp
+            return out
+
+        self.commands = ["show run"]
+
+        self.conn.connect(self.address, 22, username=self.username,
+                          password=self.password, timeout=5)
+
+        self.shell = self.conn.invoke_shell()
+        self.shell.settimeout(2)
+        self.shell.setblocking(1)
+
+        send_and_readuntil("enable\n", "Password:")
+        send_and_readuntil(self.password + "\n", "#")
+        send_and_readuntil("terminal length 0\n", "#")
+
+        configs = ""
+        for command in self.commands:
+            config = send_and_readuntil(command + "\n", "#").decode()
+            configs += config[:config.rfind('\n')]
+
+
+        self.shell.send("terminal length 24\n")
+        self.shell.close()
+        return configs
