@@ -1,0 +1,144 @@
+show run
+Building configuration...
+
+Current configuration : 1235 bytes
+!
+! Last configuration change at 01:34:08 UTC Thu May 5 2022
+!
+version 15.5
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no platform punt-keepalive disable-kernel-core
+platform console auto
+!
+hostname R1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+!
+!
+!
+!
+!
+!
+!
+!
+
+
+no ip domain lookup
+ip domain name cis.co
+
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+subscriber templating
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+license udi pid CSR1000V sn 9O52YKZO2C4
+spanning-tree extend system-id
+!
+username cisco password 0 cisco
+!
+redundancy
+!
+!
+!
+!
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+! 
+! 
+!
+!
+interface GigabitEthernet1
+ platform ring rx 256
+ ip address 192.168.43.32 255.255.255.0
+ negotiation auto
+!
+interface GigabitEthernet2
+ platform ring rx 256
+ no ip address
+ shutdown
+ negotiation auto
+!
+!
+virtual-service csr_mgmt
+!
+ip forward-protocol nd
+!
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+control-plane
+!
+ !
+ !
+ !
+ !
+!
+!
+!
+!
+!
+line con 0
+ password cisco
+ logging synchronous
+ login
+line vty 0
+ password cisco
+ login local
+ transport input ssh
+line vty 1
+ password cisco
+ login local
+ length 0
+ transport input ssh
+line vty 2 4
+ password cisco
+ login local
+ transport input ssh
+!
+!
+end
+
