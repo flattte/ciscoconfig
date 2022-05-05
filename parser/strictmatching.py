@@ -25,7 +25,6 @@ class StrictMatchingParser(object):
     def verifyToken(self, t_token, c_token) -> bool:
         if self.ignore_ip:
             for t, c in zip(t_token.split(), c_token.split()):
-                print(t, "----", c)
                 if t == c or t=="###":
                     continue    
                 if t != c:
