@@ -33,3 +33,14 @@ line vty 0 4
 !
 somehing somthin
 !
+!
+interface FastEthernet4
+	ip address 192.168.12.2 ###
+	no ip directed-broadcast (default)
+	speed auto
+	ip nat outside
+	ip access-group 103 in
+	no cdp enable
+	crypto ipsec client ezvpn ezvpnclient outside
+	crypto map static-map
+!

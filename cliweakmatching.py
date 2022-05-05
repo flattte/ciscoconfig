@@ -19,3 +19,4 @@ if __name__ == "__main__":
  
 
     print(f"Matches found {parser.score} out of {parser.n_of_tokens}")
+    
