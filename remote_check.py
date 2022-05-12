@@ -25,7 +25,7 @@ if __name__ == "__main__":
             f.write(downloader.download())
 
         verbose = True
-        config, target = open_files(args.config, f"results/{ip}.txt")
+        config, target = open_files(args.config, f"results/config_{ip}.txt")
         parser = StrictMatchingParser(config, target, verbose)
         parser.parse()
         with open(f"results/result_{ip}.txt", 'w') as f:
