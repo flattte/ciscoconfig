@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import termcolor
 
+
 class ConfigDownloader(object):
     def __init__(self, address, username, password, commands):
         import paramiko
@@ -13,7 +14,6 @@ class ConfigDownloader(object):
         self.shell = None
 
     def download(self):
-        from paramiko.ssh_exception import AuthenticationException
 
         def send_and_readuntil(message, until):
             self.shell.send(message)
@@ -28,7 +28,7 @@ class ConfigDownloader(object):
         try:
             self.conn.connect(self.address, 22, username=self.username,
                               password=self.password, timeout=5, allow_agent=False, look_for_keys=False)
-        except AuthenticationException:
+        except:
             print(termcolor.colored(
                 f"Authentication failed for {self.address}", 'red'))
             return ""
