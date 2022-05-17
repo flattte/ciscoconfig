@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from parser.parserutils import ConfigDownloader
+from ssh.configfdownloader import ConfigDownloader
 from parser.strictmatching import StrictMatchingParser
 from parser.parserutils import open_files
 import argparse
