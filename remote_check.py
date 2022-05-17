@@ -14,9 +14,9 @@ if __name__ == "__main__":
     arg_parser.add_argument('-u', dest='username', help='username for cisco device')
     arg_parser.add_argument('-p', dest='password', help='password for cisco device')
     arg_parser.add_argument('-ip', dest='Adresses', help='targets ip addresss', default=[''], nargs='+')
-    arg_parser.add_argument('--verbose',action='store_true', help="Toggle for git diff-like comparasion of config and target configuration")
+    arg_parser.add_argument('--verbose', action='store_true',
+                            help="Toggle for git diff-like comparasion of config and target configuration")
     args = arg_parser.parse_args()
-
 
     for ip in args.Adresses:
         downloader = ConfigDownloader(
@@ -29,5 +29,4 @@ if __name__ == "__main__":
         parser = StrictMatchingParser(config, target, verbose)
         parser.parse()
         with open(f"results/result_{ip}.txt", 'w') as f:
-            f.write(
-                f"Matches found {parser.score} out of {parser.n_of_tokens}")
+            f.write(f"Matches found {parser.score} out of {parser.n_of_tokens}")
