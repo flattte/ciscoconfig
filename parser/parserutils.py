@@ -2,28 +2,15 @@ import os
 import termcolor
 
 
-def tokenizeConfig(config) -> list():
+def tokenize(config) -> list():
     token, tokens = [], []
-    for line in config.read().splitlines():
+    for line in filter(None,config.read().splitlines()):
         if '!' in line:
             if token:
                 tokens.append(token)
             token = []
         else:
-            token.append(line.strip("\t ").strip(" "))
-
-    return tokens
-
-
-def tokenizeTarget(target) -> list():
-    token, tokens = [], []
-    for line in target.read().splitlines():
-        if '!' in line:
-            if token:
-                tokens.append(token)
-            token = []
-        else:
-            token.append(line.strip("\t ").strip(" "))
+            token.append(line.strip("\t "))
     return tokens
 
 

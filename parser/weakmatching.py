@@ -1,12 +1,12 @@
 import termcolor
-from parser.parserutils import printToken, tokenizeConfig
+from parser.parserutils import printToken, tokenize
 
 # parsing cisco config to get exact, similiar and completely wrong answers
 
 
 class WeakMatchingParser(object):
     def __init__(self, config, target, verbose):
-        self.config = tokenizeConfig(config)
+        self.config = tokenize(config)
         self.target = [line for line in target.read().splitlines()]
         self.verbose = verbose
         self.score = 0

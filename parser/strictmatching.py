@@ -1,11 +1,11 @@
-from parser.parserutils import tokenizeConfig, printToken, tokenizeTarget
+from parser.parserutils import tokenize, printToken
 
 
 
 class StrictMatchingParser(object):
     def __init__(self, config, target, verbose = False, ignore_ip = True):
-        self.config = tokenizeConfig(config)
-        self.target = tokenizeTarget(target)
+        self.config = tokenize(config)
+        self.target = tokenize(target)
         self.matches = []
         self.score = 0
         self.n_of_tokens = len(self.target)
