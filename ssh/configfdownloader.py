@@ -24,7 +24,6 @@ class ConfigDownloader(object):
                 out += temp
             return out
 
-        self.commands = ["show run"]
         try:
             self.conn.connect(self.address, 22, username=self.username,
                               password=self.password, timeout=5, allow_agent=False, look_for_keys=False)

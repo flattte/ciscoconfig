@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     for ip in args.Adresses:
         downloader = ConfigDownloader(
-            ip, args.username, args.password, ["show ip int brief"])
+            ip, args.username, args.password, ["show run","show vlan"])
         with open(f"results/config_{ip}.txt", 'w') as f:
             f.write(downloader.download())
 
