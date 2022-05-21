@@ -1,6 +1,13 @@
 import os
 import termcolor
+import ipaddress
 
+def is_ip_valid(ip):
+    try:
+        ipaddress.ip_address(ip)
+        return True
+    except:
+        return False
 
 def tokenize(config) -> list():
     token, tokens = [], []
