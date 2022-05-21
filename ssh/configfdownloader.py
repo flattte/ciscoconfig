@@ -13,8 +13,15 @@ class ConfigDownloader(object):
         self.conn.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.shell = None
 
-    def download(self):
+    def check(self):
+        try:
+            self.conn.connect(self.address, 22, username=self.username,
+                              password=self.password, timeout=5, allow_agent=False, look_for_keys=False)
+        except:
+            return False
+        return True
 
+    def download(self):
         def send_and_readuntil(message, until):
             self.shell.send(message)
             temp = b""

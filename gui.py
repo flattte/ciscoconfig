@@ -4,9 +4,8 @@ import ipaddress
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtWidgets import *
 from functools import partial
-import asyncio
-import datetime
 from parser.parserutils import is_ip_valid
+from ssh.configfdownloader import ConfigDownloader
 
 # main windows class
 class myQlineEdit(QLineEdit):
@@ -17,17 +16,13 @@ class myQlineEdit(QLineEdit):
 
     def onTextChanged(self):
         text = self.text()
-
-        try:
-            ipaddress.ip_address(text)
-            self.setStyleSheet("background-color: green")
-        except:
-            self.setStyleSheet("background-color: red")
-            if text == "":
-                self.setStyleSheet("background-color: white")
-
-    def __del__(self):
-        print("Destructor called")
+        if text == "":
+            self.setStyleSheet("background-color: white")
+        else:
+            if is_ip_valid(text):
+                self.setStyleSheet("background-color: green")
+            else:
+                self.setStyleSheet("background-color: red")
 
 
 class Window:
@@ -61,7 +56,6 @@ class Window:
 
                 checkbox = QCheckBox("")
                 checkbox.setDisabled(True)
-                print(checkbox.styleSheet())
                 checkbox.resize(30, 30)
                 self.grid.addWidget(checkbox, i, j+2)
 
@@ -76,8 +70,25 @@ class Window:
         self.win.show()
         sys.exit(self.app.exec())
 
-    def buttonSSH(self, checkbox, vcv):
-        address = vcv.text()
+    def buttonSSH(self, checkbox, box):
+        ip = box.text()
+        if ip == "":
+            checkbox.setStyleSheet("background-color: lightGrey")
+            return
+        if is_ip_valid(ip):
+            ssh = ConfigDownloader(ip, "cisco", "cisco",None)
+            if ssh.check():
+                print("ssh ok")
+                checkbox.setStyleSheet("background-color: green")
+                return
+            else:
+                print("ssh failed")
+                checkbox.setStyleSheet("background-color: red")
+                return
+        else:
+            checkbox.setStyleSheet("background-color: lightGrey")
+            return
+
 
     def buttonPing(self, checkbox, box):
         ip = box.text()
