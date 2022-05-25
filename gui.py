@@ -60,6 +60,7 @@ class EntryMenu(QWidget):
             popErr("Entry must be a number.")
             return
 
+
         if any(x > 10 or x < 0 for x in (self.i, self.j)):
             popErr("Numbers are preferably positive, and smaller than 10")
             return
