@@ -12,9 +12,54 @@ import logging
 import threading
 import time
 import datetime
-logging.basicConfig(filename='app.log', encoding='utf-8', level=logging.INFO)
-# main windows class
-logging.info(f'Started logging {datetime.datetime.now()}')
+
+
+class EntryMenu(QWidget):
+    def __init__(self):
+        self.app = QApplication([])
+        super(QWidget, self).__init__()
+        self.setWindowTitle("Ciscoconfig")
+        self.i = 0
+        self.j = 0
+
+        self.rbox = QLineEdit()
+        self.rbox.setPlaceholderText("number of rows")
+        self.cbox = QLineEdit()
+        self.cbox.setPlaceholderText("number of columns")
+        self.cbox.textChanged.connect(self.onTextChanged)
+        okButton = QPushButton("OK",self)
+        okButton.clicked.connect(self.validate)
+
+        layout = QHBoxLayout()
+        layout.addWidget(self.rbox)
+        layout.addWidget(self.cbox)
+        layout.addWidget(okButton)
+        self.setFixedSize(300,200)
+        self.setLayout(layout)
+        self.show()
+
+    def onTextChanged(self):
+        self.i = self.rbox.text()
+        self.j = self.cbox.text()
+
+    def validate(self):
+        def popErr(text):
+            msg = QMessageBox()
+            msg.setWindowTitle("")
+            msg.setText("Wrong arguments")
+            x = msg.exec()
+
+        try:
+            self.i = int(self.i)
+            self.j = int(self.j)
+        except TypeError:
+            popErr("Entry must be a number.")
+            return  
+        if any(x > 10 or x < 0 for x in (self.i, self.j)):
+            popErr("Numbers are preferably positive, and smaller than 10")
+            return
+        else:
+            self.close()
 
 
 class myQlineEdit(QLineEdit):
@@ -33,18 +78,19 @@ class myQlineEdit(QLineEdit):
             else:
                 self.setStyleSheet("background-color: red")
 
-
+# main windows class
 class Window:
-    def __init__(self):
+    def __init__(self, I , J):
         self.box_list = []
         self.ping_func = []
         self.ssh_func = []
         self.addresses = dict()
         self.app = QApplication(sys.argv)
         self.win = QWidget()
+        self.win.setWindowTitle("ciscoconfig")
         self.grid = QGridLayout()
-        for i in range(0, 8):
-            for j in range(0, 2):
+        for i in range(0, I):
+            for j in range(0, J):
                 j *= 5
                 box = myQlineEdit(i, j)
                 box.setPlaceholderText("Enter IP Address")
@@ -57,6 +103,7 @@ class Window:
                 handler = partial(self.buttonSSH, button, box)
                 button.clicked.connect(handler)
                 self.grid.addWidget(button, i, j+1)
+        
                 self.ssh_func.append(handler)
 
                 button = QPushButton("PING", self.win)
@@ -78,9 +125,7 @@ class Window:
         x.daemon = True
         x.start()
 
-        app = self.app.exec()
-        self.finish()
-        sys.exit(app)
+
 
     def ping_devices(self):
         while True:
@@ -155,4 +200,17 @@ class Window:
                 logging.info(f"{ip} config parsed")
 
 
-win = Window()
+if __name__ == "__main__":
+    logging.basicConfig(filename='app.log', encoding='utf-8', level=logging.INFO)
+
+    logging.info(f'Started logging {datetime.datetime.now()}')
+
+    entry = EntryMenu()
+    app = entry.app.exec()
+    if any(x > 10 or x < 0 for x in (entry.i, entry.j)):
+        sys.exit()
+
+    win = Window(entry.i, entry.j)  
+    app = win.app.exec()
+    win.finish()
+    sys.exit(app)       

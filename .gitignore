@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 pip-log.txt
 results/*.txt
+*.log
