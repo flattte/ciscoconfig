@@ -54,7 +54,11 @@ class EntryMenu(QWidget):
             self.j = int(self.j)
         except TypeError:
             popErr("Entry must be a number.")
-            return  
+            return
+        except Exception as e:
+            print(f"cought {e.__class__}")
+            popErr("Entry must be a number.")
+
         if any(x > 10 or x < 0 for x in (self.i, self.j)):
             popErr("Numbers are preferably positive, and smaller than 10")
             return
