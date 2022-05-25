@@ -12,7 +12,7 @@ import logging
 import threading
 import time
 import datetime
-
+MAX_SIZE = 10
 
 class EntryMenu(QWidget):
     def __init__(self):
@@ -34,7 +34,7 @@ class EntryMenu(QWidget):
         layout.addWidget(self.rbox)
         layout.addWidget(self.cbox)
         layout.addWidget(okButton)
-        self.setFixedSize(300,200)
+        self.setFixedSize(400,200)
         self.setLayout(layout)
         self.show()
 
@@ -46,13 +46,13 @@ class EntryMenu(QWidget):
         def popErr(text):
             msg = QMessageBox()
             msg.setWindowTitle("")
-            msg.setText("Wrong arguments")
+            msg.setText("Wrong arguments: " + text)
             x = msg.exec()
 
         try:
             self.i = int(self.i)
             self.j = int(self.j)
-        except TypeError:
+        except (ValueError, TypeError):
             popErr("Entry must be a number.")
             return
         except Exception as e:
@@ -60,9 +60,8 @@ class EntryMenu(QWidget):
             popErr("Entry must be a number.")
             return
 
-
-        if any(x > 10 or x < 0 for x in (self.i, self.j)):
-            popErr("Numbers are preferably positive, and smaller than 10")
+        if any(x > MAX_SIZE or x < 0 for x in (self.i, self.j)):
+            popErr(f"Numbers are preferably positive, and smaller than {MAX_SIZE}")
             return
         else:
             self.close()
@@ -213,7 +212,7 @@ if __name__ == "__main__":
 
     entry = EntryMenu()
     app = entry.app.exec()
-    if any(x > 10 or x < 0 for x in (entry.i, entry.j)):
+    if any(x > MAX_SIZE or x < 0 for x in (entry.i, entry.j)):
         sys.exit()
 
     win = Window(entry.i, entry.j)  
