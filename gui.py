@@ -6,6 +6,7 @@ from parser.parserutils import is_ip_valid
 from ssh.configfdownloader import ConfigDownloader
 from parser.strictmatching import StrictMatchingParser
 from parser.parserutils import open_files
+import os
 import sys
 import ipaddress
 import logging
@@ -13,6 +14,7 @@ import threading
 import time
 import datetime
 MAX_SIZE = 10
+
 
 class EntryMenu(QWidget):
     def __init__(self):
@@ -27,14 +29,14 @@ class EntryMenu(QWidget):
         self.cbox = QLineEdit()
         self.cbox.setPlaceholderText("number of columns")
         self.cbox.textChanged.connect(self.onTextChanged)
-        okButton = QPushButton("OK",self)
+        okButton = QPushButton("OK", self)
         okButton.clicked.connect(self.validate)
 
         layout = QHBoxLayout()
         layout.addWidget(self.rbox)
         layout.addWidget(self.cbox)
         layout.addWidget(okButton)
-        self.setFixedSize(400,200)
+        self.setFixedSize(400, 200)
         self.setLayout(layout)
         self.show()
 
@@ -61,7 +63,8 @@ class EntryMenu(QWidget):
             return
 
         if any(x > MAX_SIZE or x < 0 for x in (self.i, self.j)):
-            popErr(f"Numbers are preferably positive, and smaller than {MAX_SIZE}")
+            popErr(
+                f"Numbers are preferably positive, and smaller than {MAX_SIZE}")
             return
         else:
             self.close()
@@ -84,8 +87,10 @@ class myQlineEdit(QLineEdit):
                 self.setStyleSheet("background-color: red")
 
 # main windows class
+
+
 class Window:
-    def __init__(self, I , J):
+    def __init__(self, I, J):
         self.box_list = []
         self.ping_func = []
         self.ssh_func = []
@@ -108,7 +113,7 @@ class Window:
                 handler = partial(self.buttonSSH, button, box)
                 button.clicked.connect(handler)
                 self.grid.addWidget(button, i, j+1)
-        
+
                 self.ssh_func.append(handler)
 
                 button = QPushButton("PING", self.win)
@@ -129,8 +134,6 @@ class Window:
         x = threading.Thread(target=self.try_ssh)
         x.daemon = True
         x.start()
-
-
 
     def ping_devices(self):
         while True:
@@ -206,16 +209,23 @@ class Window:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename='app.log', encoding='utf-8', level=logging.INFO)
+    logging.basicConfig(filename='app.log',
+                            encoding='utf-8', level=logging.INFO)
 
     logging.info(f'Started logging {datetime.datetime.now()}')
-
-    entry = EntryMenu()
-    app = entry.app.exec()
-    if any(x > MAX_SIZE or x < 0 for x in (entry.i, entry.j)):
+    i, j = 0, 0
+    try:
+        i = int(sys.argv[1])
+        j = int(sys.argv[2])
+    except:
+        entry = EntryMenu()
+        app = entry.app.exec()
+        if any(x > MAX_SIZE or x < 0 for x in (entry.i, entry.j)):
+            sys.exit()
+        os.system(f"{sys.executable} {sys.argv[0]} {entry.i} {entry.j}")
         sys.exit()
 
-    win = Window(entry.i, entry.j)  
+    win = Window(i, j)  
     app = win.app.exec()
     win.finish()
     sys.exit(app)       
