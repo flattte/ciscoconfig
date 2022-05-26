@@ -145,7 +145,7 @@ class Window:
             ip = box.text()
             if is_ip_valid(ip):
                 downloader = ConfigDownloader(
-                    ip, ssh_creds.username, ssh_creds.password, ssh_creds.priv_exec_mode, ["show run", "show vlan"])
+                    ip, ssh_creds.username, ssh_creds.password, ssh_creds.priv_exec_mode, ("show run", "show vlan"))
                 with open(f"results/config_{ip}.txt", 'w') as f:
                     f.write(downloader.download())
                 logging.info(
