@@ -167,13 +167,13 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(description="main gui for ciscoconfig",
                                          usage=f"{sys.executable} {sys.argv[0]} -f <path to config file> -u <ssh username> -p <ssh password> -e <privileged exec mode password> -r <rows> -c <columns>")
     arg_parser.add_argument('-f', dest='config_file',
-                            help='path to config file.')
-    arg_parser.add_argument('-u', dest='username', help='ssh username')
-    arg_parser.add_argument('-p', dest='password', help='ssh password')
+                            help='path to config file.', required=True)
+    arg_parser.add_argument('-u', dest='username', help='ssh username', required=True)
+    arg_parser.add_argument('-p', dest='password', help='ssh password', required=True)
     arg_parser.add_argument('-e', dest='priv_exec_mode',
-                            help='password for privileged exec mode')
-    arg_parser.add_argument('-r', dest='rows', help='number of rows')
-    arg_parser.add_argument('-c', dest='columns', help='number of columns')
+                            help='password for privileged exec mode', required=True)
+    arg_parser.add_argument('-r', dest='rows', help='number of rows', required=True)
+    arg_parser.add_argument('-c', dest='columns', help='number of columns', required=True)
     args = arg_parser.parse_args()
 
     logging.basicConfig(filename='app.log',
