@@ -1,6 +1,4 @@
 #!/usr/bin/python3
-import termcolor
-
 
 class ConfigDownloader(object):
     def __init__(self, address, username, password, commands):
@@ -35,8 +33,7 @@ class ConfigDownloader(object):
             self.conn.connect(self.address, 22, username=self.username,
                               password=self.password, timeout=5, allow_agent=False, look_for_keys=False)
         except:
-            print(termcolor.colored(
-                f"Authentication failed for {self.address}", 'red'))
+            print(f"Authentication failed for {self.address}")
             return ""
 
         self.shell = self.conn.invoke_shell()

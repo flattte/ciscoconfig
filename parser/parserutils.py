@@ -1,5 +1,4 @@
 import os
-import termcolor
 import ipaddress
 
 def is_ip_valid(ip):
@@ -32,9 +31,9 @@ def printToken(token, color="white") -> None:
         os.system("color")
     g = yieldToken(token)
     print("Query:")
-    print(termcolor.colored(f"    {next(g)}", color))
+    print(next(g))
     print("Body:")
-    [print(termcolor.colored(f"    {next(g)}", color))
+    [print(next(g))
      for _ in range(len(token[1][0]))]
     print()
 

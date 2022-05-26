@@ -1,4 +1,3 @@
-import termcolor
 from parser.parserutils import printToken, tokenize
 
 # parsing cisco config to get exact, similiar and completely wrong answers
