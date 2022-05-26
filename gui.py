@@ -176,7 +176,8 @@ class Window:
             return
 
         if is_ip_valid(ip):
-            if ping(ip):
+            pg = ping(ip)
+            if pg or pg == 0.0:
                 logging.info(f"{datetime.datetime.now()} {ip} ping ok")
                 button.setStyleSheet("background-color: green")
                 return
