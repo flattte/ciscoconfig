@@ -13,7 +13,7 @@ import logging
 import threading
 import time
 import datetime
-MAX_SIZE = 10
+MAX_SIZE = 16
 
 
 class EntryMenu(QWidget):
@@ -26,17 +26,20 @@ class EntryMenu(QWidget):
 
         self.rbox = QLineEdit()
         self.rbox.setPlaceholderText("number of rows")
+        self.rbox.textChanged.connect(self.onTextChanged)
+
         self.cbox = QLineEdit()
         self.cbox.setPlaceholderText("number of columns")
         self.cbox.textChanged.connect(self.onTextChanged)
+
         okButton = QPushButton("OK", self)
         okButton.clicked.connect(self.validate)
 
-        layout = QHBoxLayout()
+        layout = QFormLayout()
         layout.addWidget(self.rbox)
         layout.addWidget(self.cbox)
         layout.addWidget(okButton)
-        self.setFixedSize(400, 200)
+        self.setMinimumSize(300, 150)
         self.setLayout(layout)
         self.show()
 
@@ -58,7 +61,7 @@ class EntryMenu(QWidget):
             popErr("Entry must be a number.")
             return
         except Exception as e:
-            print(f"cought {e.__class__}")
+            #print(f"cought {e.__class__}")
             popErr("Entry must be a number.")
             return
 
@@ -87,8 +90,6 @@ class myQlineEdit(QLineEdit):
                 self.setStyleSheet("background-color: red")
 
 # main windows class
-
-
 class Window:
     def __init__(self, I, J):
         self.box_list = []
@@ -101,7 +102,7 @@ class Window:
         self.grid = QGridLayout()
         for i in range(0, I):
             for j in range(0, J):
-                j *= 5
+                j *= 3
                 box = myQlineEdit(i, j)
                 box.setPlaceholderText("Enter IP Address")
                 box.resize(200, 30)
@@ -124,7 +125,7 @@ class Window:
 
         self.win.setLayout(self.grid)
         self.win.setMinimumSize(QSize(800, 600))
-        self.win.setWindowTitle("PyQt")
+        self.win.setWindowTitle("CiscoConfig")
         self.win.show()
 
         x = threading.Thread(target=self.ping_devices)
@@ -208,6 +209,20 @@ class Window:
                 logging.info(f"{ip} config parsed")
 
 
+def run_entry_menu():
+        entry = EntryMenu()
+        app = entry.app.exec()
+        try:
+            i = int(entry.i)
+            j = int(entry.j)
+        except:
+            sys.exit()
+        
+        if any(x > MAX_SIZE or x <= 0 for x in (i, j)):
+            sys.exit()
+        os.system(f"{sys.executable} {sys.argv[0]} {i} {j}")
+        sys.exit()
+
 if __name__ == "__main__":
     logging.basicConfig(filename='app.log',
                             encoding='utf-8', level=logging.INFO)
@@ -218,14 +233,9 @@ if __name__ == "__main__":
         i = int(sys.argv[1])
         j = int(sys.argv[2])
     except:
-        entry = EntryMenu()
-        app = entry.app.exec()
-        if any(x > MAX_SIZE or x < 0 for x in (entry.i, entry.j)):
-            sys.exit()
-        os.system(f"{sys.executable} {sys.argv[0]} {entry.i} {entry.j}")
-        sys.exit()
+        run_entry_menu()
 
     win = Window(i, j)  
     app = win.app.exec()
     win.finish()
-    sys.exit(app)       
+    sys.exit(app)
