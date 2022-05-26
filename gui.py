@@ -138,13 +138,13 @@ class Window:
 
     def ping_devices(self):
         while True:
-            logging.info("pinging devices")
+            logging.info("{datetime.datetime.now()} pinging devices")
             for f in self.ping_func:
                 f()
             time.sleep(10)
 
     def try_ssh(self):
-        logging.info("checking ssh connection")
+        logging.info("{datetime.datetime.now()} checking ssh connection")
         while True:
             for f in self.ssh_func:
                 f()
@@ -158,11 +158,11 @@ class Window:
         if is_ip_valid(ip):
             ssh = ConfigDownloader(ip, "cisco", "cisco", None)
             if ssh.check():
-                logging.info(f"{ip} ssh ok")
+                logging.info(f"{datetime.datetime.now()} {ip} ssh ok")
                 button.setStyleSheet("background-color: green")
                 return
             else:
-                logging.info(f"{ip} ssh failed")
+                logging.info(f"{datetime.datetime.now()} {ip} ssh failed")
                 button.setStyleSheet("background-color: red")
                 return
         else:
@@ -177,15 +177,15 @@ class Window:
 
         if is_ip_valid(ip):
             if ping(ip):
-                logging.info(f"{ip} ping ok")
+                logging.info(f"{datetime.datetime.now()} {ip} ping ok")
                 button.setStyleSheet("background-color: green")
                 return
             else:
-                logging.info(f"{ip} ping failed")
+                logging.info(f"{datetime.datetime.now()} {ip} ping failed")
                 button.setStyleSheet("background-color: red")
                 return
         else:
-            button.setStyleSheet("background-color: lightGrey")
+            button.setStyleSheet("background-color: yellow")
             return
 
     def finish(self):
@@ -196,7 +196,7 @@ class Window:
                     ip, "cisco", "cisco", ["show run", "show vlan"])
                 with open(f"results/config_{ip}.txt", 'w') as f:
                     f.write(downloader.download())
-                logging.info(f"{ip} config downloaded")
+                logging.info(f"{datetime.datetime.now()} {ip} config downloaded")
 
                 verbose = True
                 config, target = open_files(
@@ -206,7 +206,7 @@ class Window:
                 with open(f"results/result_{ip}.txt", 'w') as f:
                     f.write(
                         f"Matches found {parser.score} out of {parser.n_of_tokens}")
-                logging.info(f"{ip} config parsed")
+                logging.info(f"{datetime.datetime.now()} {ip} config parsed")
 
 
 def run_entry_menu():
@@ -227,7 +227,7 @@ if __name__ == "__main__":
     logging.basicConfig(filename='app.log',
                             encoding='utf-8', level=logging.INFO)
 
-    logging.info(f'Started logging {datetime.datetime.now()}')
+    logging.info(f'{datetime.datetime.now()} Started logging')
     i, j = 0, 0
     try:
         i = int(sys.argv[1])
