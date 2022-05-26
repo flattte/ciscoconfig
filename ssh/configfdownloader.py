@@ -1,11 +1,13 @@
 #!/usr/bin/python3
-
+from functools import cache
 class ConfigDownloader(object):
-    def __init__(self, address, username, password, commands):
+    @cache
+    def __init__(self, address, username, password, priv_exec_mode, commands):
         import paramiko
         self.commands = commands
         self.username = username
         self.password = password
+        self.priv_exec_mode = priv_exec_mode
         self.address = address
         self.conn = paramiko.SSHClient()
         self.conn.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -41,7 +43,7 @@ class ConfigDownloader(object):
         self.shell.setblocking(1)
 
         send_and_readuntil("enable\n", "Password:")
-        send_and_readuntil(self.password + "\n", "#")
+        send_and_readuntil(self.priv_exec_mode + "\n", "#")
         send_and_readuntil("terminal length 0\n", "#")
 
         configs = ""

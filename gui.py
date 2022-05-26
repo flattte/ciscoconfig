@@ -1,76 +1,23 @@
 from ping3 import ping
-from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtWidgets import *
+from PyQt6.QtCore import QSize
+from PyQt6.QtWidgets import QLineEdit, QApplication, QWidget, QPushButton, QGridLayout
 from functools import partial
 from parser.parserutils import is_ip_valid
 from ssh.configfdownloader import ConfigDownloader
 from parser.strictmatching import StrictMatchingParser
 from parser.parserutils import open_files
-import os
+import argparse
 import sys
-import ipaddress
+import time
 import logging
 import threading
-import time
 import datetime
-MAX_SIZE = 16
 
-
-class EntryMenu(QWidget):
-    def __init__(self):
-        self.app = QApplication([])
-        super(QWidget, self).__init__()
-        self.setWindowTitle("Ciscoconfig")
-        self.i = 0
-        self.j = 0
-
-        self.rbox = QLineEdit()
-        self.rbox.setPlaceholderText("number of rows")
-        self.rbox.textChanged.connect(self.onTextChanged)
-
-        self.cbox = QLineEdit()
-        self.cbox.setPlaceholderText("number of columns")
-        self.cbox.textChanged.connect(self.onTextChanged)
-
-        okButton = QPushButton("OK", self)
-        okButton.clicked.connect(self.validate)
-
-        layout = QFormLayout()
-        layout.addWidget(self.rbox)
-        layout.addWidget(self.cbox)
-        layout.addWidget(okButton)
-        self.setMinimumSize(300, 150)
-        self.setLayout(layout)
-        self.show()
-
-    def onTextChanged(self):
-        self.i = self.rbox.text()
-        self.j = self.cbox.text()
-
-    def validate(self):
-        def popErr(text):
-            msg = QMessageBox()
-            msg.setWindowTitle("")
-            msg.setText("Wrong arguments: " + text)
-            x = msg.exec()
-
-        try:
-            self.i = int(self.i)
-            self.j = int(self.j)
-        except (ValueError, TypeError):
-            popErr("Entry must be a number.")
-            return
-        except Exception as e:
-            #print(f"cought {e.__class__}")
-            popErr("Entry must be a number.")
-            return
-
-        if any(x > MAX_SIZE or x < 0 for x in (self.i, self.j)):
-            popErr(
-                f"Numbers are preferably positive, and smaller than {MAX_SIZE}")
-            return
-        else:
-            self.close()
+class SSH_creds:
+    def __init__(self, username, password, priv_exec_mode):
+        self.username = username
+        self.password = password
+        self.priv_exec_mode = priv_exec_mode
 
 
 class myQlineEdit(QLineEdit):
@@ -90,18 +37,21 @@ class myQlineEdit(QLineEdit):
                 self.setStyleSheet("background-color: red")
 
 # main windows class
+
+
 class Window:
-    def __init__(self, I, J):
+    def __init__(self, rows, columns, ssh_creds):
         self.box_list = []
         self.ping_func = []
         self.ssh_func = []
+        self.ssh_creds = ssh_creds
         self.addresses = dict()
         self.app = QApplication(sys.argv)
         self.win = QWidget()
         self.win.setWindowTitle("ciscoconfig")
         self.grid = QGridLayout()
-        for i in range(0, I):
-            for j in range(0, J):
+        for i in range(0, rows):
+            for j in range(0, columns):
                 j *= 3
                 box = myQlineEdit(i, j)
                 box.setPlaceholderText("Enter IP Address")
@@ -156,7 +106,8 @@ class Window:
             button.setStyleSheet("background-color: lightGrey")
             return
         if is_ip_valid(ip):
-            ssh = ConfigDownloader(ip, "cisco", "cisco", None)
+            ssh = ConfigDownloader(
+                ip, ssh_creds.username, ssh_creds.password, ssh_creds.priv_exec_mode, None)
             if ssh.check():
                 logging.info(f"{datetime.datetime.now()} {ip} ssh ok")
                 button.setStyleSheet("background-color: green")
@@ -189,19 +140,20 @@ class Window:
             button.setStyleSheet("background-color: yellow")
             return
 
-    def finish(self):
+    def finish(self, config_file):
         for box in self.box_list:
             ip = box.text()
             if is_ip_valid(ip):
                 downloader = ConfigDownloader(
-                    ip, "cisco", "cisco", ["show run", "show vlan"])
+                    ip, ssh_creds.username, ssh_creds.password, ssh_creds.priv_exec_mode, ["show run", "show vlan"])
                 with open(f"results/config_{ip}.txt", 'w') as f:
                     f.write(downloader.download())
-                logging.info(f"{datetime.datetime.now()} {ip} config downloaded")
+                logging.info(
+                    f"{datetime.datetime.now()} {ip} config downloaded")
 
                 verbose = True
                 config, target = open_files(
-                    "test/cfg.txt", f"results/config_{ip}.txt")
+                    config_file, f"results/config_{ip}.txt")
                 parser = StrictMatchingParser(config, target, verbose)
                 parser.parse()
                 with open(f"results/result_{ip}.txt", 'w') as f:
@@ -210,33 +162,28 @@ class Window:
                 logging.info(f"{datetime.datetime.now()} {ip} config parsed")
 
 
-def run_entry_menu():
-        entry = EntryMenu()
-        app = entry.app.exec()
-        try:
-            i = int(entry.i)
-            j = int(entry.j)
-        except:
-            sys.exit()
-        
-        if any(x > MAX_SIZE or x <= 0 for x in (i, j)):
-            sys.exit()
-        os.system(f"{sys.executable} {sys.argv[0]} {i} {j}")
-        sys.exit()
-
 if __name__ == "__main__":
+    # python gui.py -f test/cfg.txt -u cisco -p cisco -e cisco -r 4 -c 2
+    arg_parser = argparse.ArgumentParser(description="main gui for ciscoconfig",
+                                         usage=f"{sys.executable} {sys.argv[0]} -f <path to config file> -u <ssh username> -p <ssh password> -e <privileged exec mode password> -r <rows> -c <columns>")
+    arg_parser.add_argument('-f', dest='config_file',
+                            help='path to config file.')
+    arg_parser.add_argument('-u', dest='username', help='ssh username')
+    arg_parser.add_argument('-p', dest='password', help='ssh password')
+    arg_parser.add_argument('-e', dest='priv_exec_mode',
+                            help='password for privileged exec mode')
+    arg_parser.add_argument('-r', dest='rows', help='number of rows')
+    arg_parser.add_argument('-c', dest='columns', help='number of columns')
+    args = arg_parser.parse_args()
+
     logging.basicConfig(filename='app.log',
-                            encoding='utf-8', level=logging.INFO)
-
+                        encoding='utf-8', level=logging.INFO)
     logging.info(f'{datetime.datetime.now()} Started logging')
-    i, j = 0, 0
-    try:
-        i = int(sys.argv[1])
-        j = int(sys.argv[2])
-    except:
-        run_entry_menu()
+    ssh_creds = SSH_creds(args.username, args.password, args.priv_exec_mode)
 
-    win = Window(i, j)  
+    columns = int(args.columns)
+    rows = int(args.rows)
+    win = Window(rows, columns, ssh_creds)
     app = win.app.exec()
-    win.finish()
+    win.finish(args.config_file)
     sys.exit(app)

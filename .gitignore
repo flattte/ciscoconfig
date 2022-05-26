@@ -5,3 +5,4 @@ __pycache__/
 pip-log.txt
 results/*.txt
 *.log
+./lastrun
