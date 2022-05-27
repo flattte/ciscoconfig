@@ -5,8 +5,7 @@ from functools import partial
 from parser.parserutils import is_ip_valid
 from ssh.configfdownloader import ConfigDownloader
 from parser.strictmatching import StrictMatchingParser
-from parser.parserutils import open_files
-import argparse
+from parser.parserutils import open_files, parse_args
 import sys
 import time
 import logging
@@ -164,17 +163,7 @@ class Window:
 
 if __name__ == "__main__":
     # python gui.py -f test/cfg.txt -u cisco -p cisco -e cisco -r 4 -c 2
-    arg_parser = argparse.ArgumentParser(description="main gui for ciscoconfig",
-                                         usage=f"{sys.executable} {sys.argv[0]} -f <path to config file> -u <ssh username> -p <ssh password> -e <privileged exec mode password> -r <rows> -c <columns>")
-    arg_parser.add_argument('-f', dest='config_file',
-                            help='path to config file.', required=True)
-    arg_parser.add_argument('-u', dest='username', help='ssh username', required=True)
-    arg_parser.add_argument('-p', dest='password', help='ssh password', required=True)
-    arg_parser.add_argument('-e', dest='priv_exec_mode',
-                            help='password for privileged exec mode', required=True)
-    arg_parser.add_argument('-r', dest='rows', help='number of rows', required=True)
-    arg_parser.add_argument('-c', dest='columns', help='number of columns', required=True)
-    args = arg_parser.parse_args()
+    args = parse_args(None)
 
     logging.basicConfig(filename='app.log',
                         encoding='utf-8', level=logging.INFO)

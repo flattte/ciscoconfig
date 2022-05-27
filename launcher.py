@@ -1,23 +1,29 @@
 #!/usr/bin/env python3
 from PyQt6.QtCore import QSize
 from PyQt6.QtWidgets import QLineEdit, QApplication, QWidget, QPushButton, QFormLayout, QMessageBox
+from parser.parserutils import parse_args
 import sys
 import os
 MAX_SIZE = 17
 
+def popErr(text):
+    msg = QMessageBox()
+    msg.setWindowTitle("")
+    msg.setText(text)
+    x = msg.exec()
 
 class EntryMenu(QWidget):
     def __init__(self):
         self.app = QApplication([])
         super(QWidget, self).__init__()
-        self.boxes = []
+        self.boxes = dict()
         self.setWindowTitle("Ciscoconfig")
-        self.text_boxes = (("config file", "test/cfg.txt"), ("ssh username", "admin"), ("ssh password", "cisco"),
-                           ("priv exec mode", "class"))
-        for (text, default) in self.text_boxes:
+        text_boxes = {"config file" : "test/cfg.txt", "ssh username" : "admin", "ssh password" : "cisco",
+                           "priv exec mode" : "class"}
+        for text in text_boxes:
             box = QLineEdit()
-            box.setPlaceholderText(f"{text} or default: {default}")
-            self.boxes.append(box)
+            box.setPlaceholderText(f"{text} or default: {text_boxes[text]}")
+            self.boxes[box]=(text_boxes[text])
 
         self.cbox = QLineEdit()
         self.cbox.setPlaceholderText("columns")
@@ -30,26 +36,40 @@ class EntryMenu(QWidget):
         okButton = QPushButton("OK", self)
         okButton.clicked.connect(self.validate)
 
+        lastrunButton = QPushButton("load last run config", self)
+        lastrunButton.clicked.connect(self.lastrun)
+
         layout = QFormLayout()
         for box in self.boxes:
             layout.addRow(box)
         layout.addWidget(self.rbox)
         layout.addWidget(self.cbox)
         layout.addWidget(okButton)
+        layout.addWidget(lastrunButton)
         self.setMinimumSize(360, 250)
         self.setLayout(layout)
         self.show()
+
+    def lastrun(self):
+        try:
+            with open("lastrun") as f:
+                command = f.read()
+                args = parse_args(command.split(" ")[2:])
+                boxes = list(self.boxes.keys())
+                boxes[0].setText(args.config_file)
+                boxes[1].setText(args.username)
+                boxes[2].setText(args.password)
+                boxes[3].setText(args.priv_exec_mode)
+                self.cbox.setText(args.columns)
+                self.rbox.setText(args.rows)
+        except Exception as e:
+            popErr(f"Error: {e}")
 
     def onTextChanged(self):
         self.columns = self.cbox.text()
         self.rows = self.rbox.text()
 
     def validate(self):
-        def popErr(text):
-            msg = QMessageBox()
-            msg.setWindowTitle("")
-            msg.setText("Wrong arguments: " + text)
-            x = msg.exec()
         try:
             self.columns = int(self.columns)
             self.rows = int(self.rows)
@@ -77,18 +97,13 @@ def main():
     except:
         sys.exit()
 
-    for i in range(len(entry.boxes)):
-        box = entry.boxes[i]
-        if not box.text():
-            box.setText(entry.text_boxes[i][1])
-    config_file = entry.boxes[0].text()
-    ssh_username = entry.boxes[1].text()
-    ssh_password = entry.boxes[2].text()
-    priv_exec_mode = entry.boxes[3].text()
+    args = list(entry.boxes.values())
+    config_file = args[0]
+    ssh_username = args[1]
+    ssh_password = args[2]
+    priv_exec_mode = args[3]
     rows = entry.rows
     columns = entry.columns
-    if any(x > MAX_SIZE or x <= 0 for x in (rows, columns)):
-        sys.exit()
     command = f"{sys.executable} gui.py -f {config_file} -u {ssh_username} -p {ssh_password} -e {priv_exec_mode} -r {rows} -c {columns}"
     with open("lastrun","w") as f:
         f.write(command)
