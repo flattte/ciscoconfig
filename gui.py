@@ -83,7 +83,7 @@ class DesktopComponent(QGroupBox):
                 button.setStyleSheet("background-color: red")
                 return
         else:
-            button.setStyleSheet("background-color: lightGrey")
+            button.setStyleSheet("background-color: red")
             return
 
     def buttonPing(self, button, box):
@@ -103,7 +103,7 @@ class DesktopComponent(QGroupBox):
                 button.setStyleSheet("background-color: red")
                 return
         else:
-            button.setStyleSheet("background-color: yellow")
+            button.setStyleSheet("background-color: red")
             return
 
 class Window:
