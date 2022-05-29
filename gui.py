@@ -120,7 +120,7 @@ class Window:
 
         for i in range(rows):
             for j in range(columns):
-                id = i*rows + j
+                id = i*columns + j
                 desktop = DesktopComponent(id, devices_list, self)
                 self.grid.addWidget(desktop, i, j)
 
