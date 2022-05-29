@@ -1,6 +1,6 @@
 from ping3 import ping
 from PyQt6.QtCore import QSize
-from PyQt6.QtWidgets import QLineEdit, QApplication, QWidget, QPushButton, QGridLayout
+from PyQt6.QtWidgets import QLineEdit, QApplication, QWidget, QPushButton, QGridLayout, QGroupBox
 from functools import partial
 from parser.parserutils import is_ip_valid
 from ssh.configfdownloader import ConfigDownloader
@@ -20,7 +20,7 @@ class SSH_creds:
 
 
 class myQlineEdit(QLineEdit):
-    def __init__(self, I, J, parent=None):
+    def __init__(self, parent=None):
         super(myQlineEdit, self).__init__(parent)
         self.setPlaceholderText("Enter IP Address")
         self.textChanged.connect(self.onTextChanged)
@@ -35,69 +35,36 @@ class myQlineEdit(QLineEdit):
             else:
                 self.setStyleSheet("background-color: red")
 
-# main windows class
+class DesktopComponent(QGroupBox):
+    def __init__(self, id, devices_list, parent_ref, parent=None):
+        super(DesktopComponent, self).__init__()
+        self.setTitle(str(id))
+        self.parent_ref = parent_ref
+        self.devices_list = devices_list
+        self.layout = QGridLayout()
+        for i in range(len(self.devices_list)):
+            self.initDevice(self.devices_list[i], i)
 
+    def initDevice(self, device, row):
+        box = myQlineEdit()
+        box.setPlaceholderText(f"Enter {device} ip address")
+        box.resize(200, 30)
+        box.textEdited.connect(lambda: box.onTextChanged)
+        self.parent_ref.box_list.append(box)
+        self.layout.addWidget(box, row, 0)
 
-class Window:
-    def __init__(self, rows, columns, ssh_creds):
-        self.box_list = []
-        self.ping_func = []
-        self.ssh_func = []
-        self.ssh_creds = ssh_creds
-        self.addresses = dict()
-        self.app = QApplication(sys.argv)
-        self.win = QWidget()
-        self.win.setWindowTitle("ciscoconfig")
-        self.grid = QGridLayout()
-        for i in range(0, rows):
-            for j in range(0, columns):
-                j *= 3
-                box = myQlineEdit(i, j)
-                box.setPlaceholderText("Enter IP Address")
-                box.resize(200, 30)
-                box.textEdited.connect(lambda: box.onTextChanged())
-                self.box_list.append(box)
-                self.grid.addWidget(box, i, j)
+        button = QPushButton("SSH")
+        handler = partial(self.buttonSSH, button, box)
+        button.clicked.connect(handler)
+        self.parent_ref.ssh_func.append(handler)
+        self.layout.addWidget(button, row, 1)
 
-                button = QPushButton("SSH", self.win)
-                handler = partial(self.buttonSSH, button, box)
-                button.clicked.connect(handler)
-                self.grid.addWidget(button, i, j+1)
-
-                self.ssh_func.append(handler)
-
-                button = QPushButton("PING", self.win)
-                handler = partial(self.buttonPing, button, box)
-                button.clicked.connect(handler)
-                self.grid.addWidget(button, i, j+2)
-                self.ping_func.append(handler)
-
-        self.win.setLayout(self.grid)
-        self.win.setMinimumSize(QSize(800, 600))
-        self.win.setWindowTitle("CiscoConfig")
-        self.win.show()
-
-        x = threading.Thread(target=self.ping_devices)
-        x.daemon = True
-        x.start()
-
-        x = threading.Thread(target=self.try_ssh)
-        x.daemon = True
-        x.start()
-
-    def ping_devices(self):
-        while True:
-            logging.info("{datetime.datetime.now()} pinging devices")
-            for f in self.ping_func:
-                f()
-            time.sleep(10)
-
-    def try_ssh(self):
-        logging.info("{datetime.datetime.now()} checking ssh connection")
-        while True:
-            for f in self.ssh_func:
-                f()
-            time.sleep(30)
+        button = QPushButton("PING")
+        handler = partial(self.buttonPing, button, box)
+        button.clicked.connect(handler)
+        self.parent_ref.ping_func.append(handler)
+        self.layout.addWidget(button, row, 2)
+        self.setLayout(self.layout)
 
     def buttonSSH(self, button, box):
         ip = box.text()
@@ -138,6 +105,51 @@ class Window:
         else:
             button.setStyleSheet("background-color: yellow")
             return
+
+class Window:
+    def __init__(self, rows, columns, ssh_creds):
+        self.box_list = []
+        self.ping_func = []
+        self.ssh_func = []
+        self.ssh_creds = ssh_creds
+        self.app = QApplication(sys.argv)
+        self.win = QWidget()
+        self.win.setWindowTitle("ciscoconfig")
+        self.grid = QGridLayout()
+        devices_list = ["R1", "R2", "S1", "S2"]
+
+        for i in range(rows):
+            for j in range(columns):
+                id = i*rows + j
+                desktop = DesktopComponent(id, devices_list, self)
+                self.grid.addWidget(desktop, i, j)
+
+        self.win.setLayout(self.grid)
+        self.win.setMinimumSize(QSize(800, 600))
+        self.win.setWindowTitle("CiscoConfig")
+        self.win.show()
+
+        x = threading.Thread(target=self.ping_devices)
+        x.daemon = True
+        x.start()
+
+        x = threading.Thread(target=self.try_ssh)
+        x.daemon = True
+        x.start()
+
+    def ping_devices(self):
+        while True:
+            logging.info("{datetime.datetime.now()} pinging devices")
+            for f in self.ping_func:
+                f()
+            time.sleep(10)
+
+    def try_ssh(self):
+        logging.info("{datetime.datetime.now()} checking ssh connection")
+        while True:
+            for f in self.ssh_func:
+                f()
+            time.sleep(30)
 
     def finish(self, config_file):
         for box in self.box_list:
