@@ -98,6 +98,10 @@ def main():
         sys.exit()
 
     args = list(entry.boxes.values())
+    for n,box in enumerate(entry.boxes):
+        if box.text():
+            args[n] = box.text()
+
     config_file = args[0]
     ssh_username = args[1]
     ssh_password = args[2]
