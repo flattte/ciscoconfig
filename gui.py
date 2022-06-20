@@ -11,7 +11,7 @@ import time
 import logging
 import threading
 import datetime
-from launcher import EntryMenu
+from launcher import EntryMenu, launcherMenu
 from signal import alarm
 
 
@@ -131,8 +131,8 @@ class Window:
                 desktop.setMinimumHeight(len(devices_list) * 30)
                 desktop.setMinimumWidth(200)
                 self.grid.addWidget(desktop, i, j)
-        [ self.grid.setRowMinimumHeight(i, (len(devices_list) + 1) * 30) for i in range(rows) ]
-        [ self.grid.setColumnMinimumWidth(i, 400) for i in range(columns) ]
+        [grid.setRowMinimumHeight(i, (len(devices_list) + 1) * 30) for i in range(rows)]
+        [self.grid.setColumnMinimumWidth(i, 350) for i in range(columns)]
 
         button = QPushButton("Download")
         handler = partial(self.finish, config_file)
@@ -192,23 +192,6 @@ def download_config(ip, config_file):
         f.write(
             f"Matches found {parser.score} out of {parser.n_of_tokens}")
     logging.info(f"{datetime.datetime.now()} {ip} config parsed")
-
-
-def launcherMenu():
-    entry = EntryMenu()
-    app = entry.app.exec()
-    try:
-        columns = int(entry.columns)
-        rows = int(entry.rows)
-    except:
-        sys.exit()
-
-    args = list(entry.boxes.values())
-    for n, box in enumerate(entry.boxes):
-        if box.text():
-            args[n] = box.text()
-
-    return args, entry.rows, entry.columns
 
 
 if __name__ == "__main__":

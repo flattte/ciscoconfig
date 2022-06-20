@@ -6,11 +6,13 @@ import sys
 import os
 MAX_SIZE = 17
 
+
 def popErr(text):
     msg = QMessageBox()
     msg.setWindowTitle("")
     msg.setText(text)
     x = msg.exec()
+
 
 class EntryMenu(QWidget):
     def __init__(self):
@@ -18,25 +20,25 @@ class EntryMenu(QWidget):
         super(QWidget, self).__init__()
         self.boxes = dict()
         self.setWindowTitle("Ciscoconfig")
-        text_boxes = {"config file" : "test/cfg.txt", "ssh username" : "admin", "ssh password" : "cisco",
-                           "priv exec mode" : "class"}
+        text_boxes = {"config file": "test/cfg.txt", "ssh username": "admin", "ssh password": "cisco",
+                      "priv exec mode": "class"}
         for text in text_boxes:
             box = QLineEdit()
             box.setPlaceholderText(f"{text} or default: {text_boxes[text]}")
-            self.boxes[box]=(text_boxes[text])
+            self.boxes[box] = (text_boxes[text])
 
         self.cbox = QLineEdit()
-        self.cbox.setPlaceholderText("columns")
+        self.cbox.setPlaceholderText("Columns")
         self.cbox.textChanged.connect(self.onTextChanged)
 
         self.rbox = QLineEdit()
-        self.rbox.setPlaceholderText("rows")
+        self.rbox.setPlaceholderText("Rows")
         self.rbox.textChanged.connect(self.onTextChanged)
 
         okButton = QPushButton("OK", self)
         okButton.clicked.connect(self.validate)
 
-        lastrunButton = QPushButton("load last run config", self)
+        lastrunButton = QPushButton("Last run", self)
         lastrunButton.clicked.connect(self.lastrun)
 
         layout = QFormLayout()
@@ -70,25 +72,31 @@ class EntryMenu(QWidget):
         self.rows = self.rbox.text()
 
     def validate(self):
-        try:
-            self.columns = int(self.columns)
-            self.rows = int(self.rows)
-        except (ValueError, TypeError):
-            popErr("Entry must be a number.")
+        rows = self.check_int(self.rows)
+        if not rows:
+            popErr(f"\"{self.rows}\" is not a number")
             return
-        except Exception as e:
-            popErr("Entry must be a number.")
+        columns = self.check_int(self.columns)
+        if not columns:
+            popErr(f"\"{self.columns}\" is not a number")
             return
 
-        if any(x > MAX_SIZE or x < 0 for x in (self.columns, self.rows)):
+        if any(x > MAX_SIZE or x < 0 for x in (columns, rows)):
             popErr(
                 f"Numbers are preferably positive, and smaller than {MAX_SIZE}")
             return
         else:
             self.close()
 
+    def check_int(self, str):
+        try:
+            integer = int(str)
+        except (ValueError, TypeError):
+            return None
+        return integer
 
-def main():
+
+def launcherMenu():
     entry = EntryMenu()
     app = entry.app.exec()
     try:
@@ -96,23 +104,20 @@ def main():
         rows = int(entry.rows)
     except:
         sys.exit()
+    if any(x > MAX_SIZE or x < 0 for x in (columns, rows)):
+        sys.exit()
 
     args = list(entry.boxes.values())
-    for n,box in enumerate(entry.boxes):
+    for n, box in enumerate(entry.boxes):
         if box.text():
             args[n] = box.text()
 
-    config_file = args[0]
-    ssh_username = args[1]
-    ssh_password = args[2]
-    priv_exec_mode = args[3]
-    rows = entry.rows
-    columns = entry.columns
-    command = f"{sys.executable} gui.py -f {config_file} -u {ssh_username} -p {ssh_password} -e {priv_exec_mode} -r {rows} -c {columns}"
-    with open("lastrun","w") as f:
+    command = f"{sys.executable} gui.py -f {args[0]} -u {args[1]} -p {args[2]} -e {args[3]} -r {entry.rows} -c {entry.columns}"
+    with open("lastrun", "w") as f:
         f.write(command)
-    os.system(command)
-    sys.exit()
+
+    return args, entry.rows, entry.columns
+
 
 if __name__ == "__main__":
     main()
