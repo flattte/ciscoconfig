@@ -190,15 +190,7 @@ def launcherMenu():
             args[n] = box.text()
 
     return args, entry.rows, entry.columns
-    config_file = args[0]
-    ssh_username = args[1]
-    ssh_password = args[2]
-    priv_exec_mode = args[3]
-    rows = entry.rows
-    columns = entry.columns
-    command = f"{sys.executable} gui.py -f {config_file} -u {ssh_username} -p {ssh_password} -e {priv_exec_mode} -r {rows} -c {columns}"
-    with open("lastrun","w") as f:
-        f.write(command)
+
 
 if __name__ == "__main__":
     # python gui.py -f test/cfg.txt -u cisco -p cisco -e cisco -r 4 -c 2
