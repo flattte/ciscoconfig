@@ -194,7 +194,7 @@ def launcherMenu():
 
 if __name__ == "__main__":
     # python gui.py -f test/cfg.txt -u cisco -p cisco -e cisco -r 4 -c 2
-    args, columns, rows = launcherMenu()
+    args, rows, columns = launcherMenu()
     columns = int(columns)
     rows = int(rows)
 
