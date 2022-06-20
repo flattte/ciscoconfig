@@ -14,6 +14,7 @@ import datetime
 from launcher import EntryMenu
 from signal import alarm
 
+
 class SSH_creds:
     def __init__(self, username, password, priv_exec_mode):
         self.username = username
@@ -51,7 +52,8 @@ class DesktopComponent(QGroupBox):
     def initDevice(self, device, row):
         box = myQlineEdit()
         box.setPlaceholderText(f"Enter {device} ip address")
-        box.resize(200, 30)
+        box.setMinimumHeight(30)
+        box.setMinimumWidth(200)
         box.textEdited.connect(lambda: box.onTextChanged)
         self.parent_ref.box_list.append(box)
         self.layout.addWidget(box, row, 0)
@@ -126,15 +128,18 @@ class Window:
             for j in range(columns):
                 id = i*columns + j
                 desktop = DesktopComponent(id, devices_list, self)
+                desktop.setMinimumHeight(len(devices_list) * 30)
+                desktop.setMinimumWidth(200)
                 self.grid.addWidget(desktop, i, j)
+        [ self.grid.setRowMinimumHeight(i, (len(devices_list) + 1) * 30) for i in range(rows) ]
+        [ self.grid.setColumnMinimumWidth(i, 400) for i in range(columns) ]
 
         button = QPushButton("Download")
         handler = partial(self.finish, config_file)
         button.clicked.connect(handler)
-        self.grid.addWidget(button, columns+1, rows)
+        self.grid.addWidget(button, rows, columns-1)
 
         self.win.setLayout(self.grid)
-        self.win.setMinimumSize(QSize(800, 600))
         self.win.setWindowTitle("CiscoConfig")
         self.win.show()
 
