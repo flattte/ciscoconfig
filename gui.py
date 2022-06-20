@@ -111,7 +111,7 @@ class DesktopComponent(QGroupBox):
 
 
 class Window:
-    def __init__(self, rows, columns, ssh_creds):
+    def __init__(self, config_file, rows, columns, ssh_creds):
         self.box_list = []
         self.ping_func = []
         self.ssh_func = []
@@ -127,6 +127,11 @@ class Window:
                 id = i*columns + j
                 desktop = DesktopComponent(id, devices_list, self)
                 self.grid.addWidget(desktop, i, j)
+
+        button = QPushButton("Download")
+        handler = partial(self.finish, config_file)
+        button.clicked.connect(handler)
+        self.grid.addWidget(button, columns+1, rows)
 
         self.win.setLayout(self.grid)
         self.win.setMinimumSize(QSize(800, 600))
@@ -159,12 +164,13 @@ class Window:
         for box in self.box_list:
             ip = box.text()
             if is_ip_valid(ip):
-                x = threading.Thread(target=download_config, args=(ip,config_file))
+                x = threading.Thread(target=download_config,
+                                     args=(ip, config_file))
                 x.daemon = True
                 x.start()
 
 
-def download_config(ip,config_file):
+def download_config(ip, config_file):
     alarm(20)
     downloader = ConfigDownloader(
         ip, ssh_creds.username, ssh_creds.password, ssh_creds.priv_exec_mode, ("show run", "show vlan"))
@@ -210,8 +216,10 @@ if __name__ == "__main__":
                         encoding='utf-8', level=logging.INFO)
     logging.info(f'{datetime.datetime.now()} Started logging')
     ssh_creds = SSH_creds(args[1], args[2], args[3])
+    config_file = args[0]
 
-    win = Window(rows, columns, ssh_creds)
+    win = Window(config_file, rows, columns, ssh_creds)
     app = win.app.exec()
-    win.finish(args[0])
+
+    win.finish(config_file)
     sys.exit(app)
