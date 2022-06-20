@@ -11,6 +11,8 @@ import time
 import logging
 import threading
 import datetime
+from launcher import EntryMenu
+
 
 class SSH_creds:
     def __init__(self, username, password, priv_exec_mode):
@@ -173,18 +175,44 @@ class Window:
                 logging.info(f"{datetime.datetime.now()} {ip} config parsed")
 
 
+def launcherMenu():
+    entry = EntryMenu()
+    app = entry.app.exec()
+    try:
+        columns = int(entry.columns)
+        rows = int(entry.rows)
+    except:
+        sys.exit()
+
+    args = list(entry.boxes.values())
+    for n,box in enumerate(entry.boxes):
+        if box.text():
+            args[n] = box.text()
+
+    return args, entry.rows, entry.columns
+    config_file = args[0]
+    ssh_username = args[1]
+    ssh_password = args[2]
+    priv_exec_mode = args[3]
+    rows = entry.rows
+    columns = entry.columns
+    command = f"{sys.executable} gui.py -f {config_file} -u {ssh_username} -p {ssh_password} -e {priv_exec_mode} -r {rows} -c {columns}"
+    with open("lastrun","w") as f:
+        f.write(command)
+
 if __name__ == "__main__":
     # python gui.py -f test/cfg.txt -u cisco -p cisco -e cisco -r 4 -c 2
-    args = parse_args(None)
+    args, columns, rows = launcherMenu()
+    columns = int(columns)
+    rows = int(rows)
 
     logging.basicConfig(filename='app.log',
                         encoding='utf-8', level=logging.INFO)
     logging.info(f'{datetime.datetime.now()} Started logging')
-    ssh_creds = SSH_creds(args.username, args.password, args.priv_exec_mode)
+    ssh_creds = SSH_creds(args[1], args[2], args[3])
 
-    columns = int(args.columns)
-    rows = int(args.rows)
+
     win = Window(rows, columns, ssh_creds)
     app = win.app.exec()
-    win.finish(args.config_file)
+    win.finish(args[0])
     sys.exit(app)
