@@ -12,7 +12,7 @@ import logging
 import threading
 import datetime
 from launcher import EntryMenu
-
+from signal import alarm
 
 class SSH_creds:
     def __init__(self, username, password, priv_exec_mode):
@@ -36,6 +36,7 @@ class myQlineEdit(QLineEdit):
                 self.setStyleSheet("background-color: green")
             else:
                 self.setStyleSheet("background-color: red")
+
 
 class DesktopComponent(QGroupBox):
     def __init__(self, id, devices_list, parent_ref, parent=None):
@@ -108,6 +109,7 @@ class DesktopComponent(QGroupBox):
             button.setStyleSheet("background-color: red")
             return
 
+
 class Window:
     def __init__(self, rows, columns, ssh_creds):
         self.box_list = []
@@ -157,22 +159,28 @@ class Window:
         for box in self.box_list:
             ip = box.text()
             if is_ip_valid(ip):
-                downloader = ConfigDownloader(
-                    ip, ssh_creds.username, ssh_creds.password, ssh_creds.priv_exec_mode, ("show run", "show vlan"))
-                with open(f"results/config_{ip}.txt", 'w') as f:
-                    f.write(downloader.download())
-                logging.info(
-                    f"{datetime.datetime.now()} {ip} config downloaded")
+                x = threading.Thread(target=download_config, args=(ip,config_file))
+                x.daemon = True
+                x.start()
 
-                verbose = True
-                config, target = open_files(
-                    config_file, f"results/config_{ip}.txt")
-                parser = StrictMatchingParser(config, target, verbose)
-                parser.parse()
-                with open(f"results/result_{ip}.txt", 'w') as f:
-                    f.write(
-                        f"Matches found {parser.score} out of {parser.n_of_tokens}")
-                logging.info(f"{datetime.datetime.now()} {ip} config parsed")
+
+def download_config(ip,config_file):
+    alarm(20)
+    downloader = ConfigDownloader(
+        ip, ssh_creds.username, ssh_creds.password, ssh_creds.priv_exec_mode, ("show run", "show vlan"))
+    with open(f"results/config_{ip}.txt", 'w') as f:
+        f.write(downloader.download())
+    logging.info(
+        f"{datetime.datetime.now()} {ip} config downloaded")
+    verbose = True
+    config, target = open_files(
+        config_file, f"results/config_{ip}.txt")
+    parser = StrictMatchingParser(config, target, verbose)
+    parser.parse()
+    with open(f"results/result_{ip}.txt", 'w') as f:
+        f.write(
+            f"Matches found {parser.score} out of {parser.n_of_tokens}")
+    logging.info(f"{datetime.datetime.now()} {ip} config parsed")
 
 
 def launcherMenu():
@@ -185,7 +193,7 @@ def launcherMenu():
         sys.exit()
 
     args = list(entry.boxes.values())
-    for n,box in enumerate(entry.boxes):
+    for n, box in enumerate(entry.boxes):
         if box.text():
             args[n] = box.text()
 
@@ -202,7 +210,6 @@ if __name__ == "__main__":
                         encoding='utf-8', level=logging.INFO)
     logging.info(f'{datetime.datetime.now()} Started logging')
     ssh_creds = SSH_creds(args[1], args[2], args[3])
-
 
     win = Window(rows, columns, ssh_creds)
     app = win.app.exec()
