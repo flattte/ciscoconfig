@@ -119,7 +119,3 @@ def launcherMenu():
         f.write(command)
 
     return args, entry.rows, entry.columns
-
-
-if __name__ == "__main__":
-    main()
