@@ -131,7 +131,7 @@ class Window:
                 desktop.setMinimumHeight(len(devices_list) * 30)
                 desktop.setMinimumWidth(200)
                 self.grid.addWidget(desktop, i, j)
-        [grid.setRowMinimumHeight(i, (len(devices_list) + 1) * 30) for i in range(rows)]
+        [self.grid.setRowMinimumHeight(i, (len(devices_list) + 1) * 30) for i in range(rows)]
         [self.grid.setColumnMinimumWidth(i, 350) for i in range(columns)]
 
         button = QPushButton("Download")
