@@ -1,254 +1,185 @@
+show run
 Building configuration...
-Current configuration : 3781 bytes
+
+
+Current configuration : 2105 bytes
 !
-version 12.3
-no service pad
+! Last configuration change at 13:53:49 UTC Tue Jun 21 2022
+!
+version 16.6
 service timestamps debug datetime msec
 service timestamps log datetime msec
-no service password-encryption
+service password-encryption
+platform qfp utilization monitor load 80
+no platform punt-keepalive disable-kernel-core
 !
-hostname retail
+hostname R3
 !
 boot-start-marker
 boot-end-marker
 !
-enable password cisco123
 !
-username jsomeone password 0 cg6#107X
-aaa new-model
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
 !
-aaa group server radius rad_eap
-	server 10.0.1.1 auth-port 1812 acct-port 1813
+security passwords min-length 10
+enable secret 5 $1$FSSb$RTn05/MwZbB8Midk055iH1
 !
-aaa authentication login eap_methods group rad_eap
-aaa session-id common
-ip subnet-zero
-ip cef
+no aaa new-model
 !
-vpdn enable
-	vpdn-group 1
-	request-dialin
-	protocol pppoe
-!
-interface dialer 1
-	ip address negotiated
-	ppp authentication chap
-	dialer pool 1
-	dialer-group 1
-!
-dialer-list 1 protocol ip permit
-	ip nat inside source list 1 interface dialer 0 overload
-	ip classless (default)
-	ip route 10.10.25.2 0.255.255.255 dialer 0
-!
-ip dhcp excluded-address 10.0.1.1 10.0.1.10
-ip dhcp excluded-address 10.0.2.1 10.0.2.10
-ip dhcp excluded-address 10.0.3.1 10.0.3.10
-!
-ip dhcp pool vlan1
-   network 10.0.1.0 255.255.255.0
-   default-router 10.0.1.1 
-!
-ip dhcp pool vlan2
-   network 10.0.2.0 255.255.255.0
-   default-router 10.0.2.1 
-!
-ip dhcp pool vlan3
-   network 10.0.3.0 255.255.255.0
-   default-router 10.0.3.1 
-!
-ip ips po max-events 100
-no ftp-server write-enable
-!
-bridge irb
-!
-interface FastEthernet0
-	no ip address
-!
-interface FastEthernet1
-	no ip address
-!
-interface FastEthernet2
-	no ip address
-!
-interface FastEthernet3
-	switchport mode trunk
-	no ip address
-!
-interface FastEthernet4
-	ip address 192.168.12.2 255.255.255.0
-	no ip directed-broadcast (default)
-	speed auto
-	ip nat outside
-	ip access-group 103 in
-	no cdp enable
-	crypto ipsec client ezvpn ezvpnclient outside
-	crypto map static-map
-!
-crypto isakmp policy 1
-	encryption 3des
-	authentication pre-share
-	group 2
-	lifetime 480
-!
-crypto isakmp client configuration group rtr-remote
-	key secret-password
-	dns 10.50.10.1 10.60.10.1
-	domain company.com
-	pool dynpool
-!
-crypto ipsec transform-set vpn1 esp-3des esp-sha-hmac
-!
-crypto ipsec security-association lifetime seconds 86400
-!
-crypto dynamic-map dynmap 1
-	set transform-set vpn1
-	reverse-route
-!
-crypto map static-map 1 ipsec-isakmp dynamic dynmap
-crypto map dynmap isakmp authorization list rtr-remote
-crypto map dynmap client configuration address respond
-crypto ipsec client ezvpn ezvpnclient
-	connect auto
-	group 2 key secret-password
-	mode client
-	peer 192.168.100.1
-!
-interface Dot11Radio0
-	no ip address
-	!
-	broadcast-key vlan 1 change 45
-	!
-	encryption vlan 1 mode ciphers tkip 
-	!
-	ssid cisco
-  	 	vlan 1
- 	 	authentication open 
- 	 	authentication network-eap eap_methods 
- 	 	authentication key-management wpa optional
- 	!
-	ssid ciscowep
-		vlan 2
-		authentication open 
-		!
-	ssid ciscowpa
-		vlan 3
-		authentication open 
-	!
-	speed basic-1.0 basic-2.0 basic-5.5 6.0 9.0 basic-11.0 12.0 18.0 24.0 36.0 48.0 54.0
-	rts threshold 2312
-	power local cck 50
-	power local ofdm 30
-	channel 2462
-	station-role root
-!
-interface Dot11Radio0.1
-	description Cisco Open
-	encapsulation dot1Q 1 native
-	no cdp enable
-	bridge-group 1
-	bridge-group 1 subscriber-loop-control
-	bridge-group 1 spanning-disabled
-	bridge-group 1 block-unknown-source
-	no bridge-group 1 source-learning
-	no bridge-group 1 unicast-flooding
-!
-interface Dot11Radio0.2
-	encapsulation dot1Q 2
-	bridge-group 2
-	bridge-group 2 subscriber-loop-control
-	bridge-group 2 spanning-disabled
-	bridge-group 2 block-unknown-source
-	no bridge-group 2 source-learning
- 	no bridge-group 2 unicast-flooding
-!
-interface Dot11Radio0.3
-	encapsulation dot1Q 3
-	bridge-group 3
-	bridge-group 3 subscriber-loop-control
-	bridge-group 3 spanning-disabled
-	bridge-group 3 block-unknown-source
-	no bridge-group 3 source-learning
-	no bridge-group 3 unicast-flooding
-!
-interface Vlan1
-	no ip address
-	no ip directed-broadcast (default)
-	ip nat inside
-	crypto ipsec client ezvpn ezvpnclient inside
-	ip inspect firewall in
-	no cdp enable
-	bridge-group 1
-	bridge-group 1 spanning-disabled
-!
-interface Vlan2
-	no ip address
-	bridge-group 2
-	bridge-group 2 spanning-disabled
-!
-interface Vlan3
-	no ip address
-	bridge-group 3
-	bridge-group 3 spanning-disabled
-!
-interface BVI1
-	ip address 10.0.1.1 255.255.255.0
+no ip domain lookup
+ip domain name ccna-test.com
 !
 !
-interface BVI2
-	ip address 10.0.2.1 255.255.255.0
 !
-interface BVI3
-	ip address 10.0.3.1 255.255.255.0
 !
-ip classless
 !
+!
+!
+!
+!
+!
+subscriber templating
+! 
+! 
+! 
+! 
+!
+ipv6 unicast-routing
+!
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+license udi pid ISR4331/K9 sn FDO24130JYW
+diagnostic bootup level minimal
+spanning-tree extend system-id
+!
+!
+!
+username admin privilege 15 secret 5 $1$.37d$5eD4NUxWyy7HyEqoYKaTn/
+!
+redundancy
+ mode none
+!
+!
+!
+!
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+! 
+! 
+!
+!
+interface GigabitEthernet0/0/0
+ description do PC-B
+ ip address 172.16.16.1 255.255.255.128
+ negotiation auto
+ ipv6 address FE80::1 link-local
+ ipv6 address 2001:DB8:16:A::1/64
+ ipv6 address 2001:DB8:ABCD:A::1/64
+!
+interface GigabitEthernet0/0/1
+ description do PC-A
+ ip address 192.168.16.1 255.255.255.192
+ negotiation auto
+ ipv6 address FE80::1 link-local
+ ipv6 address 2001:DB8:ABCD:B::1/64
+!
+interface GigabitEthernet0/0/2
+ no ip address
+ negotiation auto
+!
+interface Serial0/1/0
+!
+interface Serial0/1/1
+!
+interface GigabitEthernet0
+ vrf forwarding Mgmt-intf
+ no ip address
+ shutdown
+ negotiation auto
+!
+ip forward-protocol nd
 ip http server
-no ip http secure-server
+ip http authentication local
+ip http secure-server
+ip tftp source-interface GigabitEthernet0
 !
-radius-server local
-	nas 10.0.1.1 key 0 cisco123
-	group rad_eap 
+ip ssh version 2
 !
-user jsomeone nthash 7 0529575803696F2C492143375828267C7A760E1113734624452725707C010B065B
-user AMER\jsomeone nthash 7 
-0224550C29232E041C6A5D3C5633305D5D560C09027966167137233026580E0B0D
 !
-radius-server host 10.0.1.1 auth-port 1812 acct-port 1813 key cisco123
+!
+!
 !
 control-plane
 !
-bridge 1 route ip
-bridge 2 route ip
-bridge 3 route ip
-!
-ip inspect name firewall tcp	
-ip inspect name firewall udp
-ip inspect name firewall rtsp
-ip inspect name firewall h323
-ip inspect name firewall netshow
-ip inspect name firewall ftp
-ip inspect name firewall sqlnet
-!
-access-list 103 permit udp host 200.1.1.1 any eq isakmp
-access-list 103 permit udp host 200.1.1.1 eq isakmp any
-access-list 103 permit esp host 200.1.1.1 any
-access-list 103 permit icmp any any
-access-list 103 deny ip any any
-access-list 105 permit ip 10.1.1.0 0.0.0.255 192.168.0.0 0.0.255.255
-no cdp run
+banner motd ^CCNieautoryzowanym dostep wzbroniony^C
 !
 line con 0
-	password cisco123
-	no modem enable
-	transport preferred all
-	transport output all
+ password 7 01100F17580405002F5C4F1A0A
+ login
+ transport input none
+ stopbits 1
 line aux 0
-	transport preferred all
-	transport output all
+ stopbits 1
 line vty 0 4
-	password cisco123
-	transport preferred all
-	transport input all
-	transport output all
+ login local
+ transport input ssh
+line vty 5 15
+ login local
+ transport input ssh
 !
+wsma agent exec
+!
+wsma agent config
+!
+wsma agent filesys
+!
+wsma agent notify
+!
+!
+end
+show vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+

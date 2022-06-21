@@ -10,6 +10,7 @@ import sys
 import time
 import logging
 import threading
+import multiprocessing
 import datetime
 from launcher import EntryMenu, launcherMenu
 from signal import alarm
@@ -169,14 +170,18 @@ class Window:
         for box in self.box_list:
             ip = box.text()
             if is_ip_valid(ip):
-                x = threading.Thread(target=download_config,
+                x = multiprocessing.Process(target=download_config,
                                      args=(ip, config_file))
-                x.daemon = True
                 x.start()
 
 
+def goodbye():
+    print("bye")
+
 def download_config(ip, config_file):
-    alarm(20)
+    alarm(30)
+    import atexit
+    atexit.register(goodbye)
     downloader = ConfigDownloader(
         ip, ssh_creds.username, ssh_creds.password, ssh_creds.priv_exec_mode, ("show run", "show vlan"))
     with open(f"results/config_{ip}.txt", 'w') as f:

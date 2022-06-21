@@ -17,6 +17,8 @@ def popErr(text):
 class EntryMenu(QWidget):
     def __init__(self):
         self.app = QApplication([])
+        self.columns = ""
+        self.rows = ""
         super(QWidget, self).__init__()
         self.boxes = dict()
         self.setWindowTitle("Ciscoconfig")

@@ -41,9 +41,12 @@ class ConfigDownloader(object):
         self.shell = self.conn.invoke_shell()
         self.shell.settimeout(2)
         self.shell.setblocking(1)
-
-        send_and_readuntil("enable\n", "Password:")
-        send_and_readuntil(self.priv_exec_mode + "\n", "#")
+        import time
+        time.sleep(0.4)
+        if self.shell.recv(100)[-1] == b'#':
+            print("enable")
+            send_and_readuntil("enable\n", "Password:")
+            send_and_readuntil(self.priv_exec_mode + "\n", "#")
         send_and_readuntil("terminal length 0\n", "#")
 
         configs = ""
