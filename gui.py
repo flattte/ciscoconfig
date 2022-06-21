@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from ping3 import ping
 from PyQt6.QtCore import QSize
 from PyQt6.QtWidgets import QLineEdit, QApplication, QWidget, QPushButton, QGridLayout, QGroupBox
