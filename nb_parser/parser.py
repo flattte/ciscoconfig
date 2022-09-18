@@ -23,8 +23,7 @@ class token_wrapper(object):
             self.body = content[1:]
 
 class parser(object):
-    def __init__(self, config, target,
-                verbose=False, ignore_ip=True):
+    def __init__(self, config, target, verbose=False, ignore_ip=True):
         self.config = config
         self.target = target
         self.ignore_ip = ignore_ip
@@ -45,9 +44,9 @@ class parser(object):
             if '!' not in line and line:
                 if state == mode.passive: state = mode.active
                 if line[0] == ' ':
-                    raw_text_token.append(line)
+                    raw_text_token.append(line.strip())
                 else: 
-                    ret_tokens.append(token_wrapper(raw_text_token))
+                    if raw_text_token: ret_tokens.append(token_wrapper(raw_text_token))
                     raw_text_token = [line]
             else:
                 if state == mode.active:
@@ -56,23 +55,24 @@ class parser(object):
                     state = mode.passive
                 if state == mode.passive:
                     continue
-        return ret_tokens 
+        return ret_tokens
 
-    def print_token(self,token):
-        print("Token title")
-        print("    ", token.title,)
+
+    def print_token(self, token):
+        print(token)
+        print("Token title: ", token.title,)
         if token.body:
-            print("Token body")
-            print("    ", token.body)
-        print("\n")
+            print("Token body: ", token.body)
+        print()
 
     def parse(self):
-        self.target_tokens = [token for token in self.tokenize(self.target) if token.title]
-        self.config_tokens = [token for token in self.tokenize(self.config) if token.title]
+        self.target_tokens = self.tokenize(self.target)
+        self.config_tokens = self.tokenize(self.config)
+        # for token in self.target_tokens:
+        #     print(token.body)
         if DEBUG:
             print([self.print_token(token) for token in self.target_tokens])
-            print([self.print_token(token) for token in self.config_tokens])
-                    
+            print([self.print_token(token) for token in self.config_tokens])  
 
 if __name__ == "__main__":
     c = open_file("../test/cfg1.txt")
