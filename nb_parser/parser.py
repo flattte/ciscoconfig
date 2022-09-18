@@ -1,7 +1,3 @@
-
-from distutils.debug import DEBUG
-
-
 DEBUG = True
 
 def open_file(path):
@@ -11,7 +7,6 @@ def open_file(path):
     except Exception as e:
         exit(f"Exception {e.__class__} occurred while opening {path}.\n")
     return f
-
 
 class mode:
     active = 0
