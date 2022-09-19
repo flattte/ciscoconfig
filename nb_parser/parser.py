@@ -32,8 +32,6 @@ class parser(object):
         self.config_tokens = []
 
     def tokenize(self, configuration):
-        print("configuration")
-        print(configuration)
         state = mode.passive 
         bad_lines = ['show run', 'Building', 'Current configuration :', 'version']
         ret_tokens = []
