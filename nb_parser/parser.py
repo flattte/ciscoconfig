@@ -23,14 +23,12 @@ class token_wrapper(object):
             self.body = content[1:]
 
 class parser(object):
-    def __init__(self, config, target, verbose=False, ignore_ip=True):
-        self.config = config
-        self.target = target
+    def __init__(self, configuation, verbose=False, ignore_ip=True):
+        self.configuation = configuation
         self.ignore_ip = ignore_ip
         self.verbose = verbose
-        self.target_tokens = []
-        self.config_tokens = []
-
+        self.tokens = None
+ 
     def tokenize(self, configuration):
         state = mode.passive 
         bad_lines = ['show run', 'Building', 'Current configuration :', 'version']
@@ -53,30 +51,46 @@ class parser(object):
                     state = mode.passive
                 if state == mode.passive:
                     continue
+        ret_ret_tokens = [token for token in ret_tokens if token.body is not None]
         return ret_tokens
 
+    def parse(self):
+        self.tokens = self.tokenize(self.configuation)
+        if DEBUG:
+            pass
+            [self.print_token(token) for token in self.tokens]
 
     def print_token(self, token):
-        print(token)
+        print("########")
         print("Token title: ", token.title,)
-        if token.body:
-            print("Token body: ", token.body)
+        if token.body is not None:
+            print("Token body: ")
+            [print("  ", line) for line in token.body]
+        print("########")
         print()
 
-    def parse(self):
-        self.target_tokens = self.tokenize(self.target)
-        self.config_tokens = self.tokenize(self.config)
-        # for token in self.target_tokens:
-        #     print(token.body)
-        if DEBUG:
-            print([self.print_token(token) for token in self.target_tokens])
-            print([self.print_token(token) for token in self.config_tokens])  
+class checker(object):
+    def __init__(self, config, target): 
+        self.config = config
+        self.target = target
+    
+    def check(self): 
+        counter_target = 0
+        couter_config = 0
+        
+    @staticmethod
+    def similarityMetric(cline, tline):
+        intersection_cardinality = len(set.intersection(*[set(cline), set(tline)]))
+        union_cardinality = len(set.union(*[set(cline), set(tline)]))
+        return intersection_cardinality/float(union_cardinality)
 
+### test
 if __name__ == "__main__":
     c = open_file("../test/cfg1.txt")
     t = open_file("../test/cfg2.txt")
-    config = [line.strip('\n') for line in c.readlines()]
-    target = [line.strip('\n') for line in t.readlines()]
-    p = parser(config, target)
-    p.parse()
+    config_file = [line.strip('\n') for line in c.readlines()]
+    target_file = [line.strip('\n') for line in t.readlines()]
+    config = parser(config_file).parse()
+    target = parser(target_file).parse()
+    
 
