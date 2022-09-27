@@ -1,6 +1,9 @@
+from io import TextIOWrapper
+import typing
 DEBUG = True
 
-def open_file(path):
+
+def open_file(path: str) -> TextIOWrapper:
     assert type(path) is str, "path must be a string preferably valid xd"
     try:
         f = open(path, 'r')
@@ -13,7 +16,7 @@ class mode:
     passive = 1
 
 class token_wrapper(object):
-    def __init__(self, content):
+    def __init__(self, content: list[str | None]):
         self.content = content
         self.title = None
         self.body = None 
@@ -22,19 +25,20 @@ class token_wrapper(object):
         if content[1:]:
             self.body = content[1:]
 
-class parser(object):
-    def __init__(self, configuation, verbose=False, ignore_ip=True):
+class nb_parser(object):
+    def __init__(self, configuation: list[str],
+                 verbose: bool = False, ignore_ip: bool = True):
         self.configuation = configuation
         self.ignore_ip = ignore_ip
         self.verbose = verbose
         self.tokens = None
  
-    def tokenize(self, configuration):
+    def tokenize(self):
         state = mode.passive 
         bad_lines = ['show run', 'Building', 'Current configuration :', 'version']
         ret_tokens = []
         raw_text_token = []
-        for line in configuration:
+        for line in self.configuration:
             if any([bad_line in line for bad_line in bad_lines]):
                 continue
             if '!' not in line and line:
@@ -60,7 +64,7 @@ class parser(object):
             pass
             [self.print_token(token) for token in self.tokens]
 
-    def print_token(self, token):
+    def print_token(self, token: token_wrapper):
         print("########")
         print("Token title: ", token.title,)
         if token.body is not None:
@@ -70,16 +74,16 @@ class parser(object):
         print()
 
 class checker(object):
-    def __init__(self, config, target): 
-        self.config = config
-        self.target = target
+    def __init__(self, config: nb_parser, target:nb_parser): 
+        self.config: nb_parser = config
+        self.target: nb_parser = target
     
     def check(self): 
         counter_target = 0
         couter_config = 0
         
     @staticmethod
-    def similarityMetric(cline, tline):
+    def similarityMetric(cline: str, tline: str) -> float:
         intersection_cardinality = len(set.intersection(*[set(cline), set(tline)]))
         union_cardinality = len(set.union(*[set(cline), set(tline)]))
         return intersection_cardinality/float(union_cardinality)
@@ -90,7 +94,7 @@ if __name__ == "__main__":
     t = open_file("../test/cfg2.txt")
     config_file = [line.strip('\n') for line in c.readlines()]
     target_file = [line.strip('\n') for line in t.readlines()]
-    config = parser(config_file).parse()
-    target = parser(target_file).parse()
+    config = nb_parser(config_file).parse()
+    target = nb_parser(target_file).parse()
     
 

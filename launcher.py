@@ -1,49 +1,49 @@
 #!/usr/bin/env python3
+from argparse import Namespace
 from PyQt6.QtCore import QSize
 from PyQt6.QtWidgets import QLineEdit, QApplication, QWidget, QPushButton, QFormLayout, QMessageBox
 from parser.parserutils import parse_args
 import sys
+from typing import Dict, List, Tuple
 import os
 MAX_SIZE = 17
 
-
-def popErr(text):
+def popErr(text: str):
     msg = QMessageBox()
     msg.setWindowTitle("")
     msg.setText(text)
     x = msg.exec()
 
-
 class EntryMenu(QWidget):
     def __init__(self):
-        self.app = QApplication([])
-        self.columns = ""
-        self.rows = ""
+        self.app: QApplication = QApplication([])
         super(QWidget, self).__init__()
-        self.boxes = dict()
         self.setWindowTitle("Ciscoconfig")
-        text_boxes = {"config file": "test/cfg.txt", "ssh username": "admin", "ssh password": "cisco",
+        self.columns: int | None = None
+        self.rows: int | None = None
+        self.boxes: Dict[QLineEdit, str] = dict()
+        text_boxes: Dict[str, str] = {"config file": "test/cfg.txt", "ssh username": "admin", "ssh password": "cisco",
                       "priv exec mode": "class"}
         for text in text_boxes:
-            box = QLineEdit()
+            box: QLineEdit = QLineEdit()
             box.setPlaceholderText(f"{text} or default: {text_boxes[text]}")
             self.boxes[box] = (text_boxes[text])
 
-        self.cbox = QLineEdit()
+        self.cbox: QLineEdit = QLineEdit()
         self.cbox.setPlaceholderText("Columns")
         self.cbox.textChanged.connect(self.onTextChanged)
 
-        self.rbox = QLineEdit()
+        self.rbox: QLineEdit = QLineEdit()
         self.rbox.setPlaceholderText("Rows")
         self.rbox.textChanged.connect(self.onTextChanged)
 
-        okButton = QPushButton("OK", self)
+        okButton: QPushButton = QPushButton("OK", self)
         okButton.clicked.connect(self.validate)
 
-        lastrunButton = QPushButton("Last run", self)
+        lastrunButton: QPushButton = QPushButton("Last run", self)
         lastrunButton.clicked.connect(self.lastrun)
 
-        layout = QFormLayout()
+        layout: QFormLayout = QFormLayout()
         for box in self.boxes:
             layout.addRow(box)
         layout.addWidget(self.rbox)
@@ -57,8 +57,8 @@ class EntryMenu(QWidget):
     def lastrun(self):
         try:
             with open("lastrun") as f:
-                command = f.read()
-                args = parse_args(command.split(" ")[2:])
+                command: str = f.read()
+                args: Namespace = parse_args(command.split(" ")[2:])
                 boxes = list(self.boxes.keys())
                 boxes[0].setText(args.config_file)
                 boxes[1].setText(args.username)
@@ -74,7 +74,7 @@ class EntryMenu(QWidget):
         self.rows = self.rbox.text()
 
     def validate(self):
-        rows = self.check_int(self.rows)
+        rows: int | None = self.check_int(self.rows)
         if not rows:
             popErr(f"\"{self.rows}\" is not a number")
             return
@@ -90,32 +90,29 @@ class EntryMenu(QWidget):
         else:
             self.close()
 
-    def check_int(self, str):
+    def check_int(self, str) -> int | None:
         try:
             integer = int(str)
         except (ValueError, TypeError):
             return None
         return integer
+    
+    @staticmethod
+    def launcherMenu() -> Tuple[List[str], int | None, int | None]:
+        entry = EntryMenu()
+        app = entry.app.exec()
+        if entry.rows is None or entry.columns is None:
+            sys.exit()
+        if any(x > MAX_SIZE or x < 0 for x in (int(entry.columns), int(entry.rows))):
+            sys.exit()
 
+        args = list(entry.boxes.values())
+        for n, box in enumerate(entry.boxes):
+            if box.text():
+                args[n] = box.text()
 
-def launcherMenu():
-    entry = EntryMenu()
-    app = entry.app.exec()
-    try:
-        columns = int(entry.columns)
-        rows = int(entry.rows)
-    except:
-        sys.exit()
-    if any(x > MAX_SIZE or x < 0 for x in (columns, rows)):
-        sys.exit()
+        command = f"{sys.executable} gui.py -f {args[0]} -u {args[1]} -p {args[2]} -e {args[3]} -r {entry.rows} -c {entry.columns}"
+        with open("lastrun", "w") as f:
+            f.write(command)
 
-    args = list(entry.boxes.values())
-    for n, box in enumerate(entry.boxes):
-        if box.text():
-            args[n] = box.text()
-
-    command = f"{sys.executable} gui.py -f {args[0]} -u {args[1]} -p {args[2]} -e {args[3]} -r {entry.rows} -c {entry.columns}"
-    with open("lastrun", "w") as f:
-        f.write(command)
-
-    return args, entry.rows, entry.columns
+        return args, entry.rows, entry.columns
