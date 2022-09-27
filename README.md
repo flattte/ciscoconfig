@@ -8,7 +8,7 @@ python -m pip install pyqt6 paramiko ping3 ipaddress
 
 ## type checked with mypy
 ```
-[dependencies python -m pip install mypy types-paramiko]
+[dependencies]:  python -m pip install mypy types-paramiko
 mypy .
 ```
 
