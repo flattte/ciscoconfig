@@ -1,3 +1,5 @@
+from io import TextIOWrapper
+from typing import List, Tuple
 import os
 import sys
 import ipaddress
@@ -10,8 +12,9 @@ def is_ip_valid(ip):
     except:
         return False
 
-def tokenize(config) -> list():
-    token, tokens = [], []
+def tokenize(config: TextIOWrapper) -> List[List[str]]:
+    tokens: List[List] = []
+    token: List = []
     for line in filter(None,config.read().splitlines()):
         if '!' in line:
             if token:
@@ -22,7 +25,7 @@ def tokenize(config) -> list():
     return tokens
 
 
-def yieldToken(token):
+def yieldToken(token: list[list[str]]):
     yield token[1][1]
     for t in token[1][0]:
         yield t
@@ -40,7 +43,7 @@ def printToken(token, color="white") -> None:
     print()
 
 
-def open_files(path1, path2):
+def open_files(path1, path2) -> Tuple[TextIOWrapper, TextIOWrapper]:
     assert type(
         path1) is str, "Enter a -s flag followed by config path to config file."
     assert type(
@@ -59,7 +62,7 @@ def open_files(path1, path2):
 
     return file1, file2
 
-def parse_args(args):
+def parse_args(args) -> argparse.Namespace:
     arg_parser = argparse.ArgumentParser(description="main gui for ciscoconfig",
                             usage=f"{sys.executable} {sys.argv[0]} -f <path to config file> -u <ssh username> -p <ssh password> -e <privileged exec mode password> -r <rows> -c <columns>")
     arg_parser.add_argument('-f', dest='config_file',

@@ -6,27 +6,28 @@ from functools import partial
 from parser.parserutils import is_ip_valid
 from ssh.configfdownloader import ConfigDownloader
 from parser.strictmatching import StrictMatchingParser
-from parser.parserutils import open_files, parse_args
+from parser.parserutils import open_files
 import sys
 import time
 import logging
 import threading
 import multiprocessing
 import datetime
-from launcher import EntryMenu, launcherMenu
+from launcher import EntryMenu
 from signal import alarm
+from typing import List, Callable
 
 
 class SSH_creds:
-    def __init__(self, username, password, priv_exec_mode):
-        self.username = username
-        self.password = password
-        self.priv_exec_mode = priv_exec_mode
+    def __init__(self, username: str, password: str, priv_exec_mode: str):
+        self.username: str = username
+        self.password: str = password
+        self.priv_exec_mode: str = priv_exec_mode
 
 
-class myQlineEdit(QLineEdit):
+class customQlineEdit(QLineEdit):
     def __init__(self, parent=None):
-        super(myQlineEdit, self).__init__(parent)
+        super(customQlineEdit, self).__init__(parent)
         self.setPlaceholderText("Enter IP Address")
         self.textChanged.connect(self.onTextChanged)
 
@@ -42,17 +43,17 @@ class myQlineEdit(QLineEdit):
 
 
 class DesktopComponent(QGroupBox):
-    def __init__(self, id, devices_list, parent_ref, parent=None):
+    def __init__(self, id: int, devices_list: List[str], parent_ref: object):
         super(DesktopComponent, self).__init__()
         self.setTitle(str(id))
-        self.parent_ref = parent_ref
-        self.devices_list = devices_list
+        self.parent_ref: object = parent_ref
+        self.devices_list: List[str] = devices_list
         self.layout = QGridLayout()
         for i in range(len(self.devices_list)):
             self.initDevice(self.devices_list[i], i)
 
     def initDevice(self, device, row):
-        box = myQlineEdit()
+        box = customQlineEdit()
         box.setPlaceholderText(f"Enter {device} ip address")
         box.setMinimumHeight(30)
         box.setMinimumWidth(200)
@@ -73,7 +74,7 @@ class DesktopComponent(QGroupBox):
         self.layout.addWidget(button, row, 2)
         self.setLayout(self.layout)
 
-    def buttonSSH(self, button, box):
+    def buttonSSH(self, button: QPushButton, box: customQlineEdit):
         ip = box.text()
         if ip == "":
             button.setStyleSheet("background-color: lightGrey")
@@ -116,15 +117,15 @@ class DesktopComponent(QGroupBox):
 
 class Window:
     def __init__(self, config_file, rows, columns, ssh_creds):
-        self.box_list = []
-        self.ping_func = []
-        self.ssh_func = []
-        self.ssh_creds = ssh_creds
-        self.app = QApplication(sys.argv)
-        self.win = QWidget()
+        self.box_list: List[customQlineEdit] = []
+        self.ping_func: List[Callable] = []
+        self.ssh_func: List[Callable] = []
+        self.ssh_creds: SSH_creds = ssh_creds
+        self.app: QApplication = QApplication(sys.argv)
+        self.win: QWidget = QWidget()
         self.win.setWindowTitle("ciscoconfig")
-        self.grid = QGridLayout()
-        devices_list = ["R1", "R2", "S1", "S2"]
+        self.grid: QGridLayout = QGridLayout()
+        devices_list: List[str] = ["R1", "R2", "S1", "S2"]
 
         for i in range(rows):
             for j in range(columns):
@@ -197,10 +198,9 @@ def download_config(ip, config_file):
 
 if __name__ == "__main__":
     # python gui.py -f test/cfg.txt -u cisco -p cisco -e cisco -r 4 -c 2
-    args, rows, columns = launcherMenu()
+    args, rows, columns = EntryMenu.launcherMenu()
     columns = int(columns)
-    rows = int(rows)
-
+    rows = int(rows) 
     logging.basicConfig(filename='app.log',
                         encoding='utf-8', level=logging.INFO)
     logging.info(f'{datetime.datetime.now()} Started logging')
